@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="120dp"
+    android:layout_width="140dp"
     android:layout_height="200dp"
     xmlns:tools="http://schemas.android.com/tools">
     <com.facebook.drawee.view.SimpleDraweeView
@@ -13,5 +13,6 @@
         tools:text="Title"
         android:id="@+id/tv_movie_title"
         android:padding="10dp"
+        android:visibility="gone"
         android:layout_alignParentBottom="true"/>
 </RelativeLayout>

@@ -1,263 +1,192 @@
 package com.contributetech.scripts
 
-import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.support.v4.view.ViewPager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.util.Log
-import android.widget.TextView
+import android.support.v4.widget.NestedScrollView
 import com.contributetech.scripts.application.ScriptsApplication
+import com.contributetech.scripts.database.DBCallBacks
 import com.contributetech.scripts.database.MovieDetail
 import com.contributetech.scripts.database.MovieDetailDao
-import com.contributetech.scripts.homescreen.CarouselPagerAdapter
-import com.contributetech.scripts.homescreen.HorizontalMovieListRecyclerAdapter
-import com.contributetech.scripts.network.responseVo.NowShowingResponseVO
+import com.contributetech.scripts.homescreen.HomeScreenFragment
+import com.contributetech.scripts.homescreen.MoviesFragmentContract
+import com.contributetech.scripts.homescreen.PagerExperienceTypeAdapter
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
-import com.contributetech.scripts.network.responseVo.PopularMoviesResponseVO
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MoviesFragmentContract.ActivityContract{
 
     @Inject
     lateinit var api:TMDBApi
 
     @Inject
-    lateinit var mMovieDetailsDao: MovieDetailDao
-    var nowShowingMovieList:ArrayList<Int> = arrayListOf()
-    var upcomingMovieList:ArrayList<Int> = arrayListOf()
-    var topRatedMovieList:ArrayList<Int> = arrayListOf()
-    var popularMovieList:ArrayList<Int> = arrayListOf()
+    lateinit var mMovieDetailsDao:MovieDetailDao
 
-    lateinit var vpCarousel:ViewPager
-    lateinit var pagerAdapter:CarouselPagerAdapter
+    lateinit var vpExperienceType:ViewPager
+    lateinit var vpPageChangeListener:ViewPager.OnPageChangeListener
+    lateinit var adapterExperienceType:PagerExperienceTypeAdapter
 
-    lateinit var rvPopularMovies:RecyclerView
-    lateinit var rvUpcomingMovies:RecyclerView
-    lateinit var rvTopRatedMovies:RecyclerView
-    lateinit var adapterUpcomingMovies:HorizontalMovieListRecyclerAdapter
-    lateinit var adapterTopRatedMovies:HorizontalMovieListRecyclerAdapter
-    lateinit var adapterPopularMovies:HorizontalMovieListRecyclerAdapter
+    var subscriptions = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         (application as ScriptsApplication).mAppComponent.inject((this))
         initView()
-        fetchMovies()
     }
 
     private fun initView() {
-        vpCarousel = findViewById(R.id.vp_carousel)
-        pagerAdapter = CarouselPagerAdapter(this)
-        vpCarousel.adapter = pagerAdapter
+        var nsvHomeContainer:NestedScrollView = findViewById(R.id.nsv_home_scrool_container)
+        nsvHomeContainer.isFillViewport = true
 
-        adapterPopularMovies = HorizontalMovieListRecyclerAdapter(this)
-        adapterTopRatedMovies = HorizontalMovieListRecyclerAdapter(this)
-        adapterUpcomingMovies = HorizontalMovieListRecyclerAdapter(this)
+        vpExperienceType = findViewById(R.id.vp_experience_type)
+        vpPageChangeListener = object:ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {
+            }
 
-        rvPopularMovies = findViewById(R.id.rv_popular_movies)
-        rvTopRatedMovies = findViewById(R.id.rv_top_rated_movies)
-        rvUpcomingMovies = findViewById(R.id.rv_upcoming_movies)
-        rvPopularMovies.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvTopRatedMovies.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvUpcomingMovies.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvPopularMovies.adapter = adapterPopularMovies
-        rvUpcomingMovies.adapter = adapterUpcomingMovies
-        rvTopRatedMovies.adapter = adapterTopRatedMovies
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            }
 
+            override fun onPageSelected(position: Int) {
+                val frag:HomeScreenFragment? = adapterExperienceType.getFragment(position)
+                if(frag != null) {
+                    if(frag.nowShowingMovieList.isEmpty()) {
+                        frag.mActivityContract.fetchMovies()
+                    }
+                }
+            }
+
+        };
+        vpExperienceType.addOnPageChangeListener(vpPageChangeListener)
+        adapterExperienceType = PagerExperienceTypeAdapter(supportFragmentManager, this as MoviesFragmentContract.ActivityContract)
+        vpExperienceType.adapter = adapterExperienceType
+        vpPageChangeListener.onPageSelected(0)
     }
 
-    private fun fetchMovies() {
+    override fun fetchMovies() {
         fetchNowShowingMoviesResults()
         fetchPopularMoviesResults()
         fetchUpcomingMoviesResults()
         fetchTopRatedMoviesResults()
     }
 
-    private fun subscribeToNowPlaying() {
-        if(!isFinishing) {
-            mMovieDetailsDao.getMoviesByIds(nowShowingMovieList)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::setNowPlayingList, this::handleError)
-        }
-
-    }
-
-    private fun subscribeToPopularMovies() {
-        if(!isFinishing) {
-            mMovieDetailsDao.getMoviesByIds(popularMovieList)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::setPopuLarMovieList, this::handleError)
-        }
-
-    }
-
-    private fun subscribeToTopRatedMovies() {
-        if(!isFinishing) {
-            mMovieDetailsDao.getMoviesByIds(topRatedMovieList)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::setTopRatedMovieList, this::handleError)
-        }
-
-    }
-
-    private fun subscribeToUpcomingMovies() {
-        if(!isFinishing) {
-            mMovieDetailsDao.getMoviesByIds(upcomingMovieList)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::setUpComingMovieList, this::handleError)
-        }
-
-    }
-
-    private fun setUpComingMovieList(movieList:List<MovieDetail>) {
-        if(!movieList.isEmpty())
-            adapterUpcomingMovies.setData(movieList as ArrayList<MovieDetail>)
-    }
-
-    private fun setTopRatedMovieList(movieList:List<MovieDetail>) {
-        if(!movieList.isEmpty())
-            adapterTopRatedMovies.setData(movieList as ArrayList<MovieDetail>)
-    }
-
-    private fun setPopuLarMovieList(movieList:List<MovieDetail>) {
-        if(!movieList.isEmpty())
-            adapterPopularMovies.setData(movieList as ArrayList<MovieDetail>)
-    }
-
-    private fun setNowPlayingList(movieList:List<MovieDetail>) {
-        if(!movieList.isEmpty())
-            pagerAdapter.setData(movieList as ArrayList<MovieDetail>)
-    }
-
     private fun fetchNowShowingMoviesResults() {
-        api.getNowPlayingMovies(ParamsUtil.getNowShowingParam())
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val disposable:Disposable = api.getNowPlayingMovies(ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleNowShowingResults, this::handleError)
+                .subscribe ({    it -> contract.handleNowShowingResults(it) }, {error -> handleError(error) })
+        subscriptions.add(disposable)
     }
 
     private fun fetchPopularMoviesResults() {
-        api.getPopularMovies(ParamsUtil.getNowShowingParam())
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val disposable:Disposable = api.getPopularMovies(ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handlePopularMoviesResults, this::handleError)
+                .subscribe ({    it -> contract.handlePopularMoviesResults(it) }, {error -> handleError(error) })
+        subscriptions.add(disposable)
     }
 
     private fun fetchUpcomingMoviesResults() {
-        api.getUpcomingMovies(ParamsUtil.getNowShowingParam())
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val disposable:Disposable = api.getUpcomingMovies(ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleUpcomingMoviesResults, this::handleError)
+                .subscribe ({    it -> contract.handleUpcomingMoviesResults(it) }, {error -> handleError(error) })
+        subscriptions.add(disposable)
     }
 
     private fun fetchTopRatedMoviesResults() {
-        api.getTopRatedMovies(ParamsUtil.getNowShowingParam())
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val disposable:Disposable = api.getTopRatedMovies(ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleTopRatedMoviesResults, this::handleError)
+                .subscribe ({    it -> contract.handleTopRatedMoviesResults(it) }, {error -> handleError(error) })
+        subscriptions.add(disposable)
     }
 
     private fun handleError(error:Throwable) {
     }
 
-    fun handleNowShowingResults(nowShowingResponse: NowShowingResponseVO) {
-        val moviesList : List<MovieDetail> = nowShowingResponse.results;
-        nowShowingMovieList = storeMoviesForNowPlaying(moviesList);
-    }
-
-    private fun storeMoviesForNowPlaying(moviesList: List<MovieDetail>): ArrayList<Int> {
-        val newList:ArrayList<Int> = nowShowingMovieList;
-        for(movie:MovieDetail in moviesList) {
-            if(!newList.contains(movie.id)) {
-                newList.add(movie.id)
-            }
+    override fun storeMoviesForNowPlaying(moviesList: List<MovieDetail>): ArrayList<Int> {
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val newList:MutableList<Int> = ArrayList();
+        for(movie: MovieDetail in moviesList) {
+            newList.add(movie.id)
         }
         val thread = Thread({
             mMovieDetailsDao.insertMoviesList(moviesList)
             runOnUiThread() {
-                subscribeToNowPlaying()
+                contract.subscribeToNowPlaying()
             }
         })
         thread.start()
-        return newList;
+        return newList as ArrayList<Int>;
     }
 
-    private fun storeMoviesForUpcoming(moviesList: List<MovieDetail>): ArrayList<Int> {
-        val newList:ArrayList<Int> = upcomingMovieList;
-        for(movie:MovieDetail in moviesList) {
-            if(!newList.contains(movie.id)) {
-                newList.add(movie.id)
-            }
+    override fun storeMoviesForUpcoming(moviesList: List<MovieDetail>): ArrayList<Int> {
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val newList:MutableList<Int> = ArrayList();
+        for(movie: MovieDetail in moviesList) {
+            newList.add(movie.id)
         }
         val thread = Thread({
             mMovieDetailsDao.insertMoviesList(moviesList)
             runOnUiThread() {
-                subscribeToUpcomingMovies()
+                contract.subscribeToUpcomingMovies()
             }
         })
         thread.start()
-        return newList;
+        return newList as ArrayList<Int>;
     }
 
-    private fun storeMoviesForTopRated(moviesList: List<MovieDetail>): ArrayList<Int> {
-        val newList:ArrayList<Int> = topRatedMovieList;
-        for(movie:MovieDetail in moviesList) {
-            if(!newList.contains(movie.id)) {
-                newList.add(movie.id)
+    override fun storeMoviesForTopRated(moviesList: List<MovieDetail>): ArrayList<Int> {
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val newList:MutableList<Int> = ArrayList();
+        for(movie: MovieDetail in moviesList) {
+            newList.add(movie.id)
+        }
+        val thread = Thread({
+            mMovieDetailsDao.insertMoviesList(moviesList as ArrayList<MovieDetail>)
+            runOnUiThread() {
+                contract.subscribeToTopRatedMovies()
             }
+        })
+        thread.start()
+        return newList as ArrayList<Int>;
+    }
+
+    override fun storeMoviesForPopular(moviesList: List<MovieDetail>): ArrayList<Int> {
+        val contract:MoviesFragmentContract.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as MoviesFragmentContract.FragmentContract
+        val newList:MutableList<Int> = ArrayList();
+        for(movie: MovieDetail in moviesList) {
+                newList.add(movie.id)
         }
         val thread = Thread({
             mMovieDetailsDao.insertMoviesList(moviesList)
             runOnUiThread() {
-                subscribeToTopRatedMovies()
+                contract.subscribeToPopularMovies()
             }
         })
         thread.start()
-        return newList;
+        return newList as ArrayList<Int>;
     }
 
-    private fun storeMoviesForPopular(moviesList: List<MovieDetail>): ArrayList<Int> {
-        val newList:ArrayList<Int> = popularMovieList;
-        for(movie:MovieDetail in moviesList) {
-            if(!newList.contains(movie.id)) {
-                newList.add(movie.id)
-            }
-        }
-        val thread = Thread({
-            mMovieDetailsDao.insertMoviesList(moviesList)
-            runOnUiThread() {
-                subscribeToPopularMovies()
-            }
-        })
-        thread.start()
-        return newList;
-    }
-
-    fun handlePopularMoviesResults(popularMoviesResult: PopularMoviesResponseVO) {
-        val moviesList : List<MovieDetail> = popularMoviesResult.results;
-        popularMovieList = storeMoviesForPopular(moviesList);
-    }
-
-    fun handleUpcomingMoviesResults(popularMoviesResult: NowShowingResponseVO) {
-        val moviesList : List<MovieDetail> = popularMoviesResult.results;
-        upcomingMovieList = storeMoviesForUpcoming(moviesList);
-    }
-
-    fun handleTopRatedMoviesResults(popularMoviesResult: PopularMoviesResponseVO) {
-        val moviesList : List<MovieDetail> = popularMoviesResult.results;
-        topRatedMovieList = storeMoviesForTopRated(moviesList);
+    override fun fetchMovieListFromDb(movieIds: ArrayList<Int>, callback:DBCallBacks.Movies.MovieListTask) {
+        mMovieDetailsDao.getMoviesByIds(movieIds)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    it -> callback.onSuccess(it)
+                }, {
+                    it -> callback.onFailure(it)
+                })
     }
 }
 

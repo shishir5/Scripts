@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <android.support.v4.view.ViewPager
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:id="@+id/vp_carousel"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:text="Popular Movies"
+                android:layout_marginTop="10dp"
+                android:padding="10dp"
+                android:textAllCaps="true"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:id="@+id/tv_string_pop_movies"/>
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_popular_movies"
+                android:layout_below="@+id/tv_string_pop_movies"
+                android:nestedScrollingEnabled="false"/>
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:text="Upcoming Movies"
+                android:layout_marginTop="10dp"
+                android:padding="10dp"
+                android:textAllCaps="true"
+                android:id="@+id/tv_string_upcoiming_movies"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_upcoming_movies"
+                android:layout_below="@+id/tv_string_upcoiming_movies"
+                android:nestedScrollingEnabled="false"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="10dp"
+                android:layout_marginTop="10dp"
+                android:text="Top Rated Movies"
+                android:id="@+id/tv_string_top_rated_movies"
+                android:textAllCaps="true"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_top_rated_movies"
+                android:layout_below="@+id/tv_string_top_rated_movies"
+                android:nestedScrollingEnabled="false"/>
+        </RelativeLayout>
+    </LinearLayout>
+</android.support.v4.widget.NestedScrollView>
