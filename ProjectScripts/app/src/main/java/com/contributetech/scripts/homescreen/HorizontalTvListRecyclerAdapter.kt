@@ -8,35 +8,35 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.contributetech.scripts.R
-import com.contributetech.scripts.database.moviesDetail.MovieDetail
+import com.contributetech.scripts.database.tvDetail.TvShowDetail
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 
-class HorizontalMovieListRecyclerAdapter(var mContext:Context):RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var mMovieList:ArrayList<MovieDetail> = ArrayList()
+class HorizontalTvListRecyclerAdapter(var mContext:Context):RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var mTvShowList:ArrayList<TvShowDetail> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return MoviesViewHolder(inflater.inflate(R.layout.horizontal_movie_list_item_view, parent, false))
+        return TvViewHolder(inflater.inflate(R.layout.horizontal_movie_list_item_view, parent, false))
     }
 
     override fun getItemCount(): Int {
-        return mMovieList.size
+        return mTvShowList.size
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val movie: MovieDetail = mMovieList.get(position)
-        (holder as MoviesViewHolder).onBindView(movie)
+        val tvShow: TvShowDetail = mTvShowList.get(position)
+        (holder as TvViewHolder).onBindView(tvShow)
     }
 
-    fun setData(newList:ArrayList<MovieDetail>) {
-        mMovieList = newList
+    fun setData(newList:ArrayList<TvShowDetail>) {
+        mTvShowList = newList
         notifyDataSetChanged()
     }
 }
 
-class MoviesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class TvViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     var fivMovieImage: SimpleDraweeView
     var tvMovieTitle:TextView
 
@@ -45,7 +45,7 @@ class MoviesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         tvMovieTitle = view.findViewById(R.id.tv_movie_title)
     }
 
-    fun onBindView(movie: MovieDetail) {
+    fun onBindView(movie: TvShowDetail) {
         tvMovieTitle.setText(movie.originalTitle)
         if(movie.backdropPath != null) {
             val path: String = NetworkImageUtil.getImagePath(movie.posterPath, ImageUtil.LandscapeSizes.mid_size)

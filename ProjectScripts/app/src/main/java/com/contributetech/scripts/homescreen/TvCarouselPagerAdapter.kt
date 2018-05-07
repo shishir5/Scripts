@@ -4,27 +4,28 @@ import android.content.Context
 import android.net.Uri
 import android.support.v4.view.PagerAdapter
 import android.view.View
-import com.contributetech.scripts.database.MovieDetail
+import com.contributetech.scripts.database.moviesDetail.MovieDetail
 import android.support.v4.view.ViewPager
 import android.view.ViewGroup
 import android.widget.TextView
 import android.view.LayoutInflater
 import com.contributetech.scripts.R
+import com.contributetech.scripts.database.tvDetail.TvShowDetail
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 
 
-class CarouselPagerAdapter(var context:Context) : PagerAdapter() {
+class TvCarouselPagerAdapter(var context:Context) : PagerAdapter() {
 
-    var movieList:ArrayList<MovieDetail> = ArrayList()
+    var tvShowList:ArrayList<TvShowDetail> = ArrayList()
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`
     }
 
     override fun getCount(): Int {
-        return movieList.size
+        return tvShowList.size
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
@@ -34,10 +35,10 @@ class CarouselPagerAdapter(var context:Context) : PagerAdapter() {
         val tvTitle = view.findViewById(R.id.tv_title) as TextView
         val fivShow = view.findViewById(R.id.iv_show) as SimpleDraweeView
 
-        val movie:MovieDetail = movieList.get(position)
-        tvTitle.setText(movie.originalTitle)
-        if(movie.backdropPath != null) {
-            val path: String = NetworkImageUtil.getImagePath(movie.backdropPath, ImageUtil.LandscapeSizes.large_size)
+        val tvShow: TvShowDetail = tvShowList.get(position)
+        tvTitle.setText(tvShow.name)
+        if(tvShow.backdropPath != null) {
+            val path: String = NetworkImageUtil.getImagePath(tvShow.backdropPath, ImageUtil.LandscapeSizes.large_size)
             val uri = Uri.parse(path)
             fivShow.setImageURI(uri)
         }
@@ -54,8 +55,8 @@ class CarouselPagerAdapter(var context:Context) : PagerAdapter() {
         viewPager.removeView(view)
     }
 
-    fun setData(newList:ArrayList<MovieDetail>) {
-        movieList = newList;
+    fun setData(newList:ArrayList<TvShowDetail>) {
+        tvShowList = newList;
         notifyDataSetChanged();
     }
 

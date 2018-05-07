@@ -11,11 +11,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.contributetech.scripts.R
 import com.contributetech.scripts.database.DBCallBacks
-import com.contributetech.scripts.database.MovieDetail
-import com.contributetech.scripts.network.responseVo.NowShowingResponseVO
-import com.contributetech.scripts.network.responseVo.PopularMoviesResponseVO
+import com.contributetech.scripts.database.moviesDetail.MovieDetail
+import com.contributetech.scripts.network.responseVo.ShowListResponseVO
+import com.contributetech.scripts.network.responseVo.ShowsResponseVO
 
-class HomeScreenFragment:Fragment(), MoviesFragmentContract.FragmentContract {
+class HomeMoviesFragment:Fragment(), Contract.Movies.FragmentContract {
 
     var nowShowingMovieList:ArrayList<Int> = arrayListOf()
     var upcomingMovieList:ArrayList<Int> = arrayListOf()
@@ -23,7 +23,7 @@ class HomeScreenFragment:Fragment(), MoviesFragmentContract.FragmentContract {
     var popularMovieList:ArrayList<Int> = arrayListOf()
 
     lateinit var vpCarousel: ViewPager
-    lateinit var pagerAdapter:CarouselPagerAdapter
+    lateinit var pagerAdapterMovie:MovieCarouselPagerAdapter
 
     lateinit var rvPopularMovies: RecyclerView
     lateinit var rvUpcomingMovies: RecyclerView
@@ -32,11 +32,16 @@ class HomeScreenFragment:Fragment(), MoviesFragmentContract.FragmentContract {
     lateinit var adapterTopRatedMovies:HorizontalMovieListRecyclerAdapter
     lateinit var adapterPopularMovies:HorizontalMovieListRecyclerAdapter
 
-    lateinit var mActivityContract:MoviesFragmentContract.ActivityContract
+    lateinit var mActivityContract:Contract.Movies.ActivityContract
 
     companion object {
-        fun newInstance():HomeScreenFragment {
-            val fragment = HomeScreenFragment()
+        val NOW_SHOWING_MOVIES:String = "NOW_SHOWING_MOVIES"
+        val POPULAR_MOVIES:String = "POPULAR_MOVIES"
+        val UPCOMING_MOVIES:String = "UPCOMING_MOVIES"
+        val TOP_RATED_MOVIES:String = "TOP_RATED_MOVIES"
+
+        fun newInstance():HomeMoviesFragment {
+            val fragment = HomeMoviesFragment()
             return fragment
         }
     }
@@ -50,8 +55,8 @@ class HomeScreenFragment:Fragment(), MoviesFragmentContract.FragmentContract {
     private fun initView(view:View) {
         val context:Context = activity as Context
         vpCarousel = view.findViewById(R.id.vp_carousel)
-        pagerAdapter = CarouselPagerAdapter(context)
-        vpCarousel.adapter = pagerAdapter
+        pagerAdapterMovie = MovieCarouselPagerAdapter(context)
+        vpCarousel.adapter = pagerAdapterMovie
         adapterPopularMovies = HorizontalMovieListRecyclerAdapter(context)
         adapterTopRatedMovies = HorizontalMovieListRecyclerAdapter(context)
         adapterUpcomingMovies = HorizontalMovieListRecyclerAdapter(context)
@@ -83,12 +88,6 @@ class HomeScreenFragment:Fragment(), MoviesFragmentContract.FragmentContract {
 
             })
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if(nowShowingMovieList.isEmpty())
-            mActivityContract.fetchMovies()
     }
 
     override fun subscribeToPopularMovies() {
@@ -156,29 +155,29 @@ class HomeScreenFragment:Fragment(), MoviesFragmentContract.FragmentContract {
 
     private fun setNowPlayingList(movieList:List<MovieDetail>) {
         if(!movieList.isEmpty())
-            pagerAdapter.setData(movieList as ArrayList<MovieDetail>)
+            pagerAdapterMovie.setData(movieList as ArrayList<MovieDetail>)
     }
 
     private fun handleError(error:Throwable) {
     }
 
-    override fun handleNowShowingResults(nowShowingResponse: NowShowingResponseVO) {
+    override fun handleNowShowingResults(nowShowingResponse: ShowListResponseVO) {
         val moviesList : List<MovieDetail> = nowShowingResponse.results;
         nowShowingMovieList = mActivityContract.storeMoviesForNowPlaying(moviesList);
     }
 
 
-    override fun handlePopularMoviesResults(popularMoviesResult: PopularMoviesResponseVO) {
+    override fun handlePopularMoviesResults(popularMoviesResult: ShowsResponseVO) {
         val moviesList : List<MovieDetail> = popularMoviesResult.results;
         popularMovieList = mActivityContract.storeMoviesForPopular(moviesList);
     }
 
-    override fun handleUpcomingMoviesResults(upcomingMovies: NowShowingResponseVO) {
+    override fun handleUpcomingMoviesResults(upcomingMovies: ShowListResponseVO) {
         val moviesList : List<MovieDetail> = upcomingMovies.results;
         upcomingMovieList = mActivityContract.storeMoviesForUpcoming(moviesList);
     }
 
-    override fun handleTopRatedMoviesResults(topRatedMovies: PopularMoviesResponseVO) {
+    override fun handleTopRatedMoviesResults(topRatedMovies: ShowsResponseVO) {
         val moviesList : List<MovieDetail> = topRatedMovies.results;
         topRatedMovieList = mActivityContract.storeMoviesForTopRated(moviesList);
     }

@@ -1,8 +1,7 @@
-package com.contributetech.scripts.database
+package com.contributetech.scripts.database.moviesDetail
 
 import android.arch.persistence.room.*
 import io.reactivex.Maybe
-import io.reactivex.Observable
 
 
 @Dao
@@ -18,7 +17,7 @@ interface MovieDetailDao {
     fun insertMoviesList(movies:List<MovieDetail>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertMovie(movie:MovieDetail)
+    fun insertMovie(movie: MovieDetail)
 
     @Update
     fun updateMovie(movie: MovieDetail)
