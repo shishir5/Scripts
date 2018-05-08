@@ -1,16 +1,16 @@
 package com.contributetech.scripts.database
 
-import com.contributetech.scripts.database.moviesDetail.MovieDetail
-import com.contributetech.scripts.database.tvDetail.TvShowDetail
+import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
 
 class DBCallBacks {
     class Movies {
         interface MovieListTask {
-            fun onSuccess(movieList: List<MovieDetail>)
+            fun onSuccess(movieList: List<MovieListItem>)
             fun onFailure(error:Throwable)
         }
         interface TvListTask {
-            fun onSuccess(movieList: List<TvShowDetail>)
+            fun onSuccess(movieList: List<TvShowListItem>)
             fun onFailure(error:Throwable)
         }
     }

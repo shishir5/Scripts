@@ -1,17 +1,18 @@
-package com.contributetech.scripts
+package com.contributetech.scripts.homescreen
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.NestedScrollView
+import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
 import com.contributetech.scripts.database.DBCallBacks
-import com.contributetech.scripts.database.moviesDetail.MovieDetail
-import com.contributetech.scripts.database.moviesDetail.MovieDetailDao
-import com.contributetech.scripts.database.tvDetail.TvShowDetail
-import com.contributetech.scripts.database.tvDetail.TvShowDetailDao
-import com.contributetech.scripts.homescreen.*
+import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
+import com.contributetech.scripts.database.moviesListItemDetail.MovieListItemDao
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItemDao
+import com.contributetech.scripts.movieDetail.MovieDetailsActivity
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,16 +21,16 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Contract.TvShows.ActivityContract{
+class HomeActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Contract.TvShows.ActivityContract{
 
     @Inject
     lateinit var api:TMDBApi
 
     @Inject
-    lateinit var mMovieDetailsDao: MovieDetailDao
+    lateinit var mMovieDetailsDao: MovieListItemDao
 
     @Inject
-    lateinit var mTvDetailsDao: TvShowDetailDao
+    lateinit var mTvDetailsDao: TvShowListItemDao
 
 
     lateinit var vpExperienceType:ViewPager
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
 
             override fun onPageSelected(position: Int) {
 
-                val frag:android.support.v4.app.Fragment? = adapterExperienceType?.getFragment(position)
+                val frag:android.support.v4.app.Fragment? = adapterExperienceType.getFragment(position)
                 if(vpExperienceType.currentItem == 0) {
                     if(frag != null) {
                         val movieFrag: HomeMoviesFragment = frag as HomeMoviesFragment
@@ -117,10 +118,10 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
     private fun handleError(error:Throwable) {
     }
 
-    override fun storeMoviesForNowPlaying(moviesList: List<MovieDetail>): ArrayList<Int> {
+    override fun storeMoviesForNowPlaying(moviesList: List<MovieListItem>): ArrayList<Int> {
         val contract:Contract.Movies.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.Movies.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(movie: MovieDetail in moviesList) {
+        for(movie: MovieListItem in moviesList) {
             newList.add(movie.id)
         }
         val thread = Thread({
@@ -133,10 +134,10 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         return newList as ArrayList<Int>;
     }
 
-    override fun storeMoviesForUpcoming(moviesList: List<MovieDetail>): ArrayList<Int> {
+    override fun storeMoviesForUpcoming(moviesList: List<MovieListItem>): ArrayList<Int> {
         val contract:Contract.Movies.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.Movies.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(movie: MovieDetail in moviesList) {
+        for(movie: MovieListItem in moviesList) {
             newList.add(movie.id)
         }
         val thread = Thread({
@@ -149,14 +150,14 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         return newList as ArrayList<Int>;
     }
 
-    override fun storeMoviesForTopRated(moviesList: List<MovieDetail>): ArrayList<Int> {
+    override fun storeMoviesForTopRated(moviesList: List<MovieListItem>): ArrayList<Int> {
         val contract:Contract.Movies.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.Movies.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(movie: MovieDetail in moviesList) {
+        for(movie: MovieListItem in moviesList) {
             newList.add(movie.id)
         }
         val thread = Thread({
-            mMovieDetailsDao.insertMoviesList(moviesList as ArrayList<MovieDetail>)
+            mMovieDetailsDao.insertMoviesList(moviesList as ArrayList<MovieListItem>)
             runOnUiThread() {
                 contract.subscribeToTopRatedMovies()
             }
@@ -165,10 +166,10 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         return newList as ArrayList<Int>;
     }
 
-    override fun storeMoviesForPopular(moviesList: List<MovieDetail>): ArrayList<Int> {
+    override fun storeMoviesForPopular(moviesList: List<MovieListItem>): ArrayList<Int> {
         val contract:Contract.Movies.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.Movies.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(movie: MovieDetail in moviesList) {
+        for(movie: MovieListItem in moviesList) {
                 newList.add(movie.id)
         }
         val thread = Thread({
@@ -181,8 +182,8 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         return newList as ArrayList<Int>;
     }
 
-    override fun fetchMovieListFromDb(movieIds: ArrayList<Int>, callback:DBCallBacks.Movies.MovieListTask) {
-        mMovieDetailsDao.getMoviesByIds(movieIds)
+    override fun fetchMovieListFromDb(moviesIds: ArrayList<Int>, callback:DBCallBacks.Movies.MovieListTask) {
+        mMovieDetailsDao.getMoviesByIds(moviesIds)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -217,74 +218,81 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
 
     private fun fetchResposeForCategory(type:String) {
         var disposable:Disposable
-                when(type) {
-                        HomeTvShowFragment.ON_AIRING_TODAY -> {
-                            val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
-                            disposable = api.getTvAiringToday(ParamsUtil.getNowShowingParam())
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.ON_AIRING_TODAY)}, { error -> handleError(error) })
-                        }
-                    HomeTvShowFragment.ON_AIR -> {
-                        val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
-                        disposable = api.getTvOnAir(ParamsUtil.getNowShowingParam())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.ON_AIR)}, { error -> handleError(error) })
-                    }
-                    HomeTvShowFragment.POPULAR_TV -> {
-                        val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
-                        disposable = api.getPopularTv(ParamsUtil.getNowShowingParam())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.POPULAR_TV)}, { error -> handleError(error) })
-                    }
-                    HomeTvShowFragment.TOP_RATED_TV -> {
-                        val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
-                        disposable = api.getTopRatedTv(ParamsUtil.getNowShowingParam())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.TOP_RATED_TV)}, { error -> handleError(error) })
-                    }
-                    HomeMoviesFragment.NOW_SHOWING_MOVIES -> {
-                        val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
-                        disposable = api.getNowPlayingMovies(ParamsUtil.getNowShowingParam())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe ({    it -> contract.handleNowShowingResults(it)}, { error -> handleError(error) })
-                    }
-                    HomeMoviesFragment.TOP_RATED_MOVIES -> {
-                        val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
-                        disposable = api.getTopRatedMovies(ParamsUtil.getNowShowingParam())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe ({    it -> contract.handleTopRatedMoviesResults(it)}, { error -> handleError(error) })
-                    }
-                    HomeMoviesFragment.POPULAR_MOVIES -> {
-                        val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
-                        disposable = api.getPopularMovies(ParamsUtil.getNowShowingParam())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe ({    it -> contract.handlePopularMoviesResults(it)}, { error -> handleError(error) })
-                    }
-                    HomeMoviesFragment.UPCOMING_MOVIES -> {
-                        val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
-                        disposable = api.getUpcomingMovies(ParamsUtil.getNowShowingParam())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe ({    it -> contract.handleUpcomingMoviesResults(it)}, { error -> handleError(error) })
-                    }
-                    else ->{
-                        return
-                    }
-                }
+        when(type) {
+            HomeTvShowFragment.ON_AIRING_TODAY -> {
+                val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
+                disposable = api.getTvAiringToday(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.ON_AIRING_TODAY)}, { error -> handleError(error) })
+            }
+
+            HomeTvShowFragment.ON_AIR -> {
+                val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
+                disposable = api.getTvOnAir(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.ON_AIR)}, { error -> handleError(error) })
+            }
+
+            HomeTvShowFragment.POPULAR_TV -> {
+                val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
+                disposable = api.getPopularTv(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.POPULAR_TV)}, { error -> handleError(error) })
+            }
+
+            HomeTvShowFragment.TOP_RATED_TV -> {
+                val contract:Contract.TvShows.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeTvShowFragment)
+                disposable = api.getTopRatedTv(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handleTvResult(it, HomeTvShowFragment.TOP_RATED_TV)}, { error -> handleError(error) })
+            }
+
+            HomeMoviesFragment.NOW_SHOWING_MOVIES -> {
+                val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
+                disposable = api.getNowPlayingMovies(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handleNowShowingResults(it)}, { error -> handleError(error) })
+            }
+
+            HomeMoviesFragment.TOP_RATED_MOVIES -> {
+                val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
+                disposable = api.getTopRatedMovies(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handleTopRatedMoviesResults(it)}, { error -> handleError(error) })
+            }
+
+            HomeMoviesFragment.POPULAR_MOVIES -> {
+                val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
+                disposable = api.getPopularMovies(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handlePopularMoviesResults(it)}, { error -> handleError(error) })
+            }
+
+            HomeMoviesFragment.UPCOMING_MOVIES -> {
+                val contract:Contract.Movies.FragmentContract = (adapterExperienceType.getFragment(vpExperienceType.currentItem) as HomeMoviesFragment)
+                disposable = api.getUpcomingMovies(ParamsUtil.getNowShowingParam())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({    it -> contract.handleUpcomingMoviesResults(it)}, { error -> handleError(error) })
+            }
+            else ->{
+                return
+            }
+        }
         subscriptions.add(disposable)
     }
 
-    override fun storeAiringTodayForTv(tvShowList: List<TvShowDetail>): ArrayList<Int> {
+    override fun storeAiringTodayForTv(tvShowList: List<TvShowListItem>): ArrayList<Int> {
         val contract:Contract.TvShows.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.TvShows.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(tvShow: TvShowDetail in tvShowList) {
+        for(tvShow: TvShowListItem in tvShowList) {
             newList.add(tvShow.id)
         }
         val thread = Thread({
@@ -297,10 +305,10 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         return newList as ArrayList<Int>;
     }
 
-    override fun storeOnTheAirShowsForTv(tvShowList: List<TvShowDetail>): ArrayList<Int> {
+    override fun storeOnTheAirShowsForTv(tvShowList: List<TvShowListItem>): ArrayList<Int> {
         val contract:Contract.TvShows.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.TvShows.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(movie: TvShowDetail in tvShowList) {
+        for(movie: TvShowListItem in tvShowList) {
             newList.add(movie.id)
         }
         val thread = Thread({
@@ -313,10 +321,10 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         return newList as ArrayList<Int>;
     }
 
-    override fun storePopularShowsForTv(tvShowList: List<TvShowDetail>): ArrayList<Int> {
+    override fun storePopularShowsForTv(tvShowList: List<TvShowListItem>): ArrayList<Int> {
         val contract:Contract.TvShows.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.TvShows.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(movie: TvShowDetail in tvShowList) {
+        for(movie: TvShowListItem in tvShowList) {
             newList.add(movie.id)
         }
         val thread = Thread({
@@ -329,10 +337,10 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         return newList as ArrayList<Int>;
     }
 
-    override fun storeTopRatedShowsForTv(tvShowList: List<TvShowDetail>): ArrayList<Int> {
+    override fun storeTopRatedShowsForTv(tvShowList: List<TvShowListItem>): ArrayList<Int> {
         val contract:Contract.TvShows.FragmentContract = adapterExperienceType.getFragment(vpExperienceType.currentItem) as Contract.TvShows.FragmentContract
         val newList:MutableList<Int> = ArrayList();
-        for(movie: TvShowDetail in tvShowList) {
+        for(movie: TvShowListItem in tvShowList) {
             newList.add(movie.id)
         }
         val thread = Thread({
@@ -354,6 +362,16 @@ class MainActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
                 }, {
                     it -> callback.onFailure(it)
                 })
+    }
+
+    override fun onMovieClick(id: Int) {
+        val intent = Intent(this, MovieDetailsActivity::class.java)
+        intent.putExtra("id", id);
+        startActivity(intent)
+    }
+
+    override fun onTvShowClick(id: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
 

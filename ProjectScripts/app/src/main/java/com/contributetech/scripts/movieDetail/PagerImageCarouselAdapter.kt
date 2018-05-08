@@ -1,45 +1,41 @@
-package com.contributetech.scripts.homescreen
+package com.contributetech.scripts.movieDetail
 
 import android.content.Context
 import android.net.Uri
 import android.support.v4.view.PagerAdapter
-import android.view.View
 import android.support.v4.view.ViewPager
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.view.LayoutInflater
 import com.contributetech.scripts.R
 import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 
+class PagerImageCarouselAdapter(var context:Context):PagerAdapter() {
 
-class TvCarouselPagerAdapter(var context:Context) : PagerAdapter() {
+    var mMovieImagesUrls: ArrayList<String> = ArrayList()
 
-    var tvShowList:ArrayList<TvShowListItem> = ArrayList()
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`
     }
 
     override fun getCount(): Int {
-        return tvShowList.size
+        return mMovieImagesUrls.size
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val view = inflater.inflate(R.layout.caraousel_item_view, null)
-
-        val tvTitle = view.findViewById(R.id.tv_title) as TextView
-        val fivShow = view.findViewById(R.id.iv_show) as SimpleDraweeView
-
-        val tvShow: TvShowListItem = tvShowList.get(position)
-        tvTitle.setText(tvShow.name)
-        if(tvShow.backdropPath != null) {
-            val path: String = NetworkImageUtil.getImagePath(tvShow.backdropPath, ImageUtil.LandscapeSizes.large_size)
+        val view = inflater.inflate(R.layout.image_carousel_item_view, null)
+        val imageUrl: String = mMovieImagesUrls.get(position)
+        val fivImage: SimpleDraweeView = view.findViewById(R.id.sdv_image)
+        if (imageUrl != null) {
+            val path: String = NetworkImageUtil.getImagePath(imageUrl, ImageUtil.LandscapeSizes.large_size)
             val uri = Uri.parse(path)
-            fivShow.setImageURI(uri.toString())
+            fivImage.setImageURI(uri.toString())
         }
 
         val viewPager = container as ViewPager
@@ -54,9 +50,8 @@ class TvCarouselPagerAdapter(var context:Context) : PagerAdapter() {
         viewPager.removeView(view)
     }
 
-    fun setData(newList:ArrayList<TvShowListItem>) {
-        tvShowList = newList;
+    fun setData(newList: ArrayList<String>) {
+        mMovieImagesUrls = newList;
         notifyDataSetChanged();
     }
-
 }

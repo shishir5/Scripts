@@ -1,4 +1,4 @@
-package com.contributetech.scripts.database.tvDetail
+package com.contributetech.scripts.database.tvListItemDetail
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName
 
 @TypeConverters(DataTypeConverter::class)
 @Entity
-class TvShowDetail (
+class TvShowListItem (
         @PrimaryKey var id:Int,
         @ColumnInfo(name = "vote_count") var voteCount:Int?,
         @ColumnInfo(name = "video") var hasVideo:Boolean,

@@ -1,10 +1,12 @@
 package com.contributetech.scripts.network
 
+import com.contributetech.scripts.database.movieDetails.MovieDetail
 import com.contributetech.scripts.network.responseVo.ShowListResponseVO
 import com.contributetech.scripts.network.responseVo.ShowsResponseVO
 import com.contributetech.scripts.network.responseVo.TvShowsResponseVO
 import io.reactivex.Observable
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.QueryMap
 
 interface TMDBApi {
@@ -32,4 +34,7 @@ interface TMDBApi {
 
     @GET("tv/top_rated")
     fun getTopRatedTv(@QueryMap param : Map<String, String>) : Observable<TvShowsResponseVO>
+
+    @GET("movie/{id}")
+    fun getMovieDetail(@Path(value = "id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<MovieDetail>
 }

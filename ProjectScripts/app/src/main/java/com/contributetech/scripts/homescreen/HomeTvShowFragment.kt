@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.contributetech.scripts.R
 import com.contributetech.scripts.database.DBCallBacks
-import com.contributetech.scripts.database.tvDetail.TvShowDetail
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
 import com.contributetech.scripts.network.responseVo.TvShowsResponseVO
 
 
@@ -93,7 +93,7 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
     override fun subscribeToAiringToday() {
         if(!(activity?.isFinishing)!!) {
             mActivityContract.fetchTvListFromDb(airingTodayTvList, object: DBCallBacks.Movies.TvListTask {
-                override fun onSuccess(movieList: List<TvShowDetail>) {
+                override fun onSuccess(movieList: List<TvShowListItem>) {
                     setAiringTodayList(movieList)
                 }
 
@@ -108,7 +108,7 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
     override fun subscribeToOnAirTv() {
         if(!(activity?.isFinishing)!!) {
             mActivityContract.fetchTvListFromDb(onAirTvList, object: DBCallBacks.Movies.TvListTask {
-                override fun onSuccess(movieList: List<TvShowDetail>) {
+                override fun onSuccess(movieList: List<TvShowListItem>) {
                     setOnAirList(movieList)
                 }
 
@@ -124,8 +124,8 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
     override fun subscribeToTopRatedTv() {
         if(!(activity?.isFinishing)!!) {
             mActivityContract.fetchTvListFromDb(topRatedTvList, object: DBCallBacks.Movies.TvListTask {
-                override fun onSuccess(tvShowList: List<TvShowDetail>) {
-                    setTopRatedMovieList(tvShowList)
+                override fun onSuccess(tvIdsList: List<TvShowListItem>) {
+                    setTopRatedMovieList(tvIdsList)
                 }
 
                 override fun onFailure(error:Throwable) {
@@ -144,7 +144,7 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
     override fun subscribeToPopularTv() {
         if(!(activity?.isFinishing)!!) {
             mActivityContract.fetchTvListFromDb(popularTvList, object: DBCallBacks.Movies.TvListTask {
-                override fun onSuccess(movieList: List<TvShowDetail>) {
+                override fun onSuccess(movieList: List<TvShowListItem>) {
                     setPopularTvList(movieList)
                 }
 
@@ -157,42 +157,42 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
 
     }
 
-    private fun setPopularTvList(tvList :List<TvShowDetail>) {
+    private fun setPopularTvList(tvList :List<TvShowListItem>) {
         if(!tvList.isEmpty())
-            adapterPopularTv.setData(tvList as ArrayList<TvShowDetail>)
+            adapterPopularTv.setData(tvList as ArrayList<TvShowListItem>)
     }
 
-    private fun setTopRatedMovieList(tvShowList:List<TvShowDetail>) {
+    private fun setTopRatedMovieList(tvShowList:List<TvShowListItem>) {
         if(!tvShowList.isEmpty())
-            adapterTopRatedMovies.setData(tvShowList as ArrayList<TvShowDetail>)
+            adapterTopRatedMovies.setData(tvShowList as ArrayList<TvShowListItem>)
     }
 
-    private fun setOnAirList(tvShowList:List<TvShowDetail>) {
+    private fun setOnAirList(tvShowList:List<TvShowListItem>) {
         if(!tvShowList.isEmpty())
-            adapterOnAirTv.setData(tvShowList as ArrayList<TvShowDetail>)
+            adapterOnAirTv.setData(tvShowList as ArrayList<TvShowListItem>)
     }
 
-    private fun setAiringTodayList(tvShowList:List<TvShowDetail>) {
+    private fun setAiringTodayList(tvShowList:List<TvShowListItem>) {
         if(!tvShowList.isEmpty())
-            pagerAdapter.setData(tvShowList as ArrayList<TvShowDetail>)
+            pagerAdapter.setData(tvShowList as ArrayList<TvShowListItem>)
     }
 
-    override fun handleTvResult(response: TvShowsResponseVO, type:String) {
+    override fun handleTvResult(tvShowsResponse: TvShowsResponseVO, type:String) {
         when(type) {
             ON_AIRING_TODAY -> {
-                val tvShowsList : List<TvShowDetail> = response.results;
+                val tvShowsList : List<TvShowListItem> = tvShowsResponse.results;
                 airingTodayTvList = mActivityContract.storeAiringTodayForTv(tvShowsList);
             }
             ON_AIR -> {
-                val tvShowsList : List<TvShowDetail> = response.results;
+                val tvShowsList : List<TvShowListItem> = tvShowsResponse.results;
                 onAirTvList = mActivityContract.storeOnTheAirShowsForTv(tvShowsList);
             }
             POPULAR_TV -> {
-                val tvShowsList : List<TvShowDetail> = response.results;
+                val tvShowsList : List<TvShowListItem> = tvShowsResponse.results;
                 popularTvList = mActivityContract.storePopularShowsForTv(tvShowsList);
             }
             TOP_RATED_TV -> {
-                val tvShowsList : List<TvShowDetail> = response.results;
+                val tvShowsList : List<TvShowListItem> = tvShowsResponse.results;
                 topRatedTvList = mActivityContract.storeTopRatedShowsForTv(tvShowsList);
             }
             else  -> {

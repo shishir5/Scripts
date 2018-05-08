@@ -8,13 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.contributetech.scripts.R
-import com.contributetech.scripts.database.tvDetail.TvShowDetail
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 
 class HorizontalTvListRecyclerAdapter(var mContext:Context):RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var mTvShowList:ArrayList<TvShowDetail> = ArrayList()
+    var mTvShowList:ArrayList<TvShowListItem> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -26,11 +26,11 @@ class HorizontalTvListRecyclerAdapter(var mContext:Context):RecyclerView.Adapter
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val tvShow: TvShowDetail = mTvShowList.get(position)
+        val tvShow: TvShowListItem = mTvShowList.get(position)
         (holder as TvViewHolder).onBindView(tvShow)
     }
 
-    fun setData(newList:ArrayList<TvShowDetail>) {
+    fun setData(newList:ArrayList<TvShowListItem>) {
         mTvShowList = newList
         notifyDataSetChanged()
     }
@@ -45,7 +45,7 @@ class TvViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         tvMovieTitle = view.findViewById(R.id.tv_movie_title)
     }
 
-    fun onBindView(movie: TvShowDetail) {
+    fun onBindView(movie: TvShowListItem) {
         tvMovieTitle.setText(movie.originalTitle)
         if(movie.backdropPath != null) {
             val path: String = NetworkImageUtil.getImagePath(movie.posterPath, ImageUtil.LandscapeSizes.mid_size)

@@ -2,14 +2,20 @@ package com.contributetech.scripts.database
 
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase
-import com.contributetech.scripts.database.moviesDetail.MovieDetail
-import com.contributetech.scripts.database.moviesDetail.MovieDetailDao
-import com.contributetech.scripts.database.tvDetail.TvShowDetail
-import com.contributetech.scripts.database.tvDetail.TvShowDetailDao
+import android.arch.persistence.room.TypeConverters
+import com.contributetech.scripts.database.movieDetails.MovieDetail
+import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
+import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
+import com.contributetech.scripts.database.moviesListItemDetail.MovieListItemDao
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItemDao
 
-@Database(entities = arrayOf(MovieDetail::class, TvShowDetail::class), version = 1, exportSchema = false)
+@Database(entities = arrayOf(MovieListItem::class, TvShowListItem::class, MovieDetail::class), version = 1, exportSchema = false)
+@TypeConverters(DataTypeConverter::class)
+
 abstract class TMDBDatabase : RoomDatabase() {
-    abstract fun getMovieDetailDao(): MovieDetailDao
-    abstract fun getTvDetailDao(): TvShowDetailDao
+    abstract fun getMovieListItemDao(): MovieListItemDao
+    abstract fun getTvListItemDao(): TvShowListItemDao
+    abstract fun getMovieDetailsDao(): MovieDetailsDao
 }
 

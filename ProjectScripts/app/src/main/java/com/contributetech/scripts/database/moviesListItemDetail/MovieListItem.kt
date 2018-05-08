@@ -1,4 +1,4 @@
-package com.contributetech.scripts.database.moviesDetail
+package com.contributetech.scripts.database.moviesListItemDetail
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
@@ -8,9 +8,8 @@ import com.contributetech.scripts.database.DataTypeConverter
 import com.google.gson.annotations.SerializedName
 
 
-@TypeConverters(DataTypeConverter::class)
 @Entity
-class MovieDetail (
+class MovieListItem (
         @PrimaryKey var id:Int,
         @ColumnInfo(name = "vote_count") var voteCount:Int?,
         @ColumnInfo(name = "video") var hasVideo:Boolean,
