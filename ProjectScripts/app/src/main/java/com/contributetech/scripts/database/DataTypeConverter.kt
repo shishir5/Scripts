@@ -5,6 +5,9 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.reflect.TypeToken
+
+
 
 
 
@@ -31,20 +34,7 @@ class DataTypeConverter {
 
     @TypeConverter
     fun jsonObjToGenreList(genres: String): ArrayList<Genre> {
-        val parser = JsonParser()
-        val tradeElement = parser.parse(genres)
-        val genresArray:JsonArray = tradeElement.getAsJsonArray()
-        val genres: MutableList<Genre> = mutableListOf()
-        for (i in 0..genresArray.size()) {
-            val genreObj: JsonObject = genresArray.get(i) as JsonObject
-            val id: Int = genreObj.get("id").asInt
-            val name: String = genreObj.get("name").asString
-            if (id != null && name != null) {
-                val genre = Genre(id, name)
-                genres.add(genre)
-            }
-        }
-        return genres as ArrayList<Genre>
+        return Gson().fromJson(genres, object : TypeToken<ArrayList<Genre>>() {}.type)
     }
 
     @TypeConverter
@@ -54,22 +44,8 @@ class DataTypeConverter {
 
     @TypeConverter
     fun jsonObjToPCList(pcArrayString: String): ArrayList<ProductionCompany> {
-        val parser = JsonParser()
-        val tradeElement = parser.parse(pcArrayString)
-        val pcJsonArray:JsonArray = tradeElement.getAsJsonArray()
-        val productionCompanies: MutableList<ProductionCompany> = mutableListOf()
-        for (i in 0..pcJsonArray.size()) {
-            val genreObj: JsonObject = pcJsonArray.get(i) as JsonObject
-            val id: Int = genreObj.get("id").asInt
-            val name: String = genreObj.get("name").asString
-            val logoPath: String = genreObj.get("logo_path").asString
-            val orgCountry: String = genreObj.get("original_country").asString
-            if (id != null && name != null) {
-                val prodCompany = ProductionCompany(id, name, logoPath, orgCountry)
-                productionCompanies.add(prodCompany)
-            }
-        }
-        return productionCompanies as ArrayList<ProductionCompany>
+        return Gson().fromJson(pcArrayString, object : TypeToken<ArrayList<ProductionCompany>>() {}.type)
+
     }
 
     @TypeConverter

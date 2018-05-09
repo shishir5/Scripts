@@ -21,7 +21,6 @@ class MovieDetail (
 
         var budget:Int,
 
-        @TypeConverters(DataTypeConverter::class)
         var genres:ArrayList<Genre>,
 
         var homepage:String?,
@@ -40,7 +39,6 @@ class MovieDetail (
         var posterPath:String?,
 
         @ColumnInfo(name = "production_companies")
-        @TypeConverters(DataTypeConverter::class)
         var productionCompanies:ArrayList<ProductionCompany>?,
 
         @ColumnInfo(name = "release_date")

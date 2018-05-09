@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
+import com.contributetech.scripts.database.Genre
+import com.contributetech.scripts.database.ProductionCompany
 import com.contributetech.scripts.database.movieDetails.MovieDetail
 import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
 import com.contributetech.scripts.network.NetworkImageUtil
@@ -35,6 +37,12 @@ class MovieDetailsActivity:AppCompatActivity() {
     lateinit var sdvPoster:SimpleDraweeView
     lateinit var tvTitle:TextView
     lateinit var tvRating:TextView
+    lateinit var tvOverview:TextView
+    lateinit var tvRevenue:TextView
+    lateinit var tvReleaseDate:TextView
+    lateinit var tvDuration:TextView
+    lateinit var tvGenre:TextView
+    lateinit var tvProductions:TextView
 
     private var mDisposables = CompositeDisposable()
 
@@ -58,7 +66,13 @@ class MovieDetailsActivity:AppCompatActivity() {
         vpCarousel.adapter = imageCarouselAdapter
         sdvPoster = findViewById(R.id.sdv_poster_image)
         tvTitle = findViewById(R.id.tv_title)
+        tvOverview = findViewById(R.id.tv_overview)
         tvRating = findViewById(R.id.tv_rating)
+        tvRevenue= findViewById(R.id.tv_revenue)
+        tvReleaseDate = findViewById(R.id.tv_release_date)
+        tvDuration = findViewById(R.id.tv_duration)
+        tvGenre = findViewById(R.id.tv_genre)
+        tvProductions= findViewById(R.id.tv_production)
     }
 
     private fun fetchMovie() {
@@ -90,6 +104,45 @@ class MovieDetailsActivity:AppCompatActivity() {
             tvRating.setText(movie.voteAvg.toString())
         }
         getCarouselImages(movie)
+        tvOverview.setText(movie.overview)
+        tvRevenue.setText("$ " + movie.revenue)
+        tvReleaseDate.setText(movie.releaseDate)
+        var durationString = ""
+        var duration:Int = movie.runtime
+        durationString = (duration % 60).toString() + " mins"
+        duration = duration / 60
+        if(duration > 0)
+            durationString = (duration).toString() + " hr  " + durationString
+
+        tvDuration.setText(durationString)
+        if (movie.genres != null)
+            setGenre(movie.genres)
+        if (movie.productionCompanies != null)
+            setProduction(movie.productionCompanies)
+    }
+
+    private fun setProduction(productionCompanies: ArrayList<ProductionCompany>?) {
+        var productions = ""
+        if (productionCompanies != null) {
+            for (company: ProductionCompany in productionCompanies) {
+                productions = productions + company.name + ","
+            }
+        }
+        if(productions.length > 0){
+            productions  = productions.substring(0, productions.length-1)
+        }
+        tvProductions.setText(productions)
+    }
+
+    private fun setGenre(genreList: ArrayList<Genre>) {
+        var genres = ""
+        for (genre: Genre in genreList) {
+            genres = genres + genre.name + ","
+        }
+        if(genres.length > 0){
+            genres  = genres.substring(0, genres.length-1)
+        }
+        tvGenre.setText(genres)
     }
 
     private fun getCarouselImages(movie:MovieDetail) {

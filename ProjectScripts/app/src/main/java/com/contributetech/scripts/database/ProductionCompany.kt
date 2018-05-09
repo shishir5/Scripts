@@ -14,6 +14,6 @@ class ProductionCompany (
     @ColumnInfo(name = "logo_path")
     var logoPath:String?,
 
-    @ColumnInfo(name = "original_country")
+    @ColumnInfo(name = "origin_country")
     var originalCountry:String?
     )

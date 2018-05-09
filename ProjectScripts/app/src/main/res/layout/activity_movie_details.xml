@@ -84,11 +84,13 @@
     </android.support.design.widget.AppBarLayout>
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="800dp"
+            android:layout_height="wrap_content"
             android:background="@android:color/holo_blue_dark">
+            <include layout="@layout/movie_detail_subcontainer"/>
         </FrameLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>
