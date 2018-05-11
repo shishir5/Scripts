@@ -44,4 +44,7 @@ interface TMDBApi {
 
     @GET("movie/{movie_id}/reviews")
     fun getReviews(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<ReviewResponseVO>
+
+    @GET("movie/{movie_id}/similar")
+    fun getSimilarMovies(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<SimilarMoviesResponseVO>
 }

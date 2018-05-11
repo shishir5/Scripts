@@ -2,7 +2,9 @@ package com.contributetech.scripts.movieDetail
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -17,12 +19,15 @@ import com.contributetech.scripts.database.ProductionCompany
 import com.contributetech.scripts.database.Review
 import com.contributetech.scripts.database.movieDetails.MovieDetail
 import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
+import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
+import com.contributetech.scripts.homescreen.HorizontalMovieListRecyclerAdapter
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
 import com.contributetech.scripts.network.responseVo.CollectionResponseVO
 import com.contributetech.scripts.network.responseVo.CreditResponseVO
 import com.contributetech.scripts.network.responseVo.ReviewResponseVO
+import com.contributetech.scripts.network.responseVo.SimilarMoviesResponseVO
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -45,9 +50,11 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
     lateinit var rvCollection:RecyclerView
     lateinit var rvCast:RecyclerView
     lateinit var vpReview:ViewPager
+    lateinit var rvSimilar:RecyclerView
     lateinit var adapterCollection:CollectionItemRecyclerAdapter
     lateinit var adapterReview:ReviewsPagerAdapter
     lateinit var adapterCast:CastHorizontalRecyclerAdapter
+    lateinit var adapterSimilar:HorizontalMovieListRecyclerAdapter
 
 
     lateinit var sdvPoster:SimpleDraweeView
@@ -75,6 +82,7 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
             fetchMovie()
             fetchReviews()
             fetchCredits()
+            fetchSimilarMovies()
         }
     }
 
@@ -84,18 +92,27 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         rvCollection = findViewById(R.id.rv_collection) as RecyclerView
         vpReview = findViewById(R.id.vp_reviews) as ViewPager
         rvCast = findViewById(R.id.rv_casts) as RecyclerView
+        rvSimilar = findViewById(R.id.rv_similar) as RecyclerView
         rvCollection.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvSimilar.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         adapterCollection = CollectionItemRecyclerAdapter()
         adapterCast = CastHorizontalRecyclerAdapter()
         adapterReview = ReviewsPagerAdapter(this)
+        adapterSimilar = HorizontalMovieListRecyclerAdapter()
         adapterCollection.onClickListener = this
+
         rvCollection.adapter = adapterCollection
         rvCast.adapter = adapterCast
-
-
         vpReview.adapter = adapterReview
         vpCarousel.adapter = imageCarouselAdapter
+        rvSimilar.adapter = adapterSimilar
+
+        rvCollection.isNestedScrollingEnabled = false
+        rvCast.isNestedScrollingEnabled = false
+        rvSimilar.isNestedScrollingEnabled = false
+
+
         sdvPoster = findViewById(R.id.sdv_poster_image)
         tvTitle = findViewById(R.id.tv_title)
         tvOverview = findViewById(R.id.tv_overview)
@@ -153,6 +170,22 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
                     handleError(it)
                 })
         mDisposables.add(disposable)
+    }
+
+    private fun fetchSimilarMovies() {
+        val disposable = mTMDBApi.getSimilarMovies(movieId, ParamsUtil.getNowShowingParam())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    setSimilarMovies(it)
+                }, {
+                    handleError(it)
+                })
+        mDisposables.add(disposable)
+    }
+
+    private fun setSimilarMovies(similarMoviesResponse: SimilarMoviesResponseVO) {
+        adapterSimilar.setData(similarMoviesResponse.results as ArrayList<MovieListItem>)
     }
 
     private fun setReviews(reviewResponse: ReviewResponseVO) {

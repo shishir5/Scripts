@@ -14,7 +14,7 @@ import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 
-class HorizontalMovieListRecyclerAdapter(var mContext:Context):RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class HorizontalMovieListRecyclerAdapter():RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var mMovieList:ArrayList<MovieListItem> = ArrayList()
     var onClickListener: IMovieClick? = null
 

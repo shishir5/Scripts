@@ -65,9 +65,9 @@ class HomeMoviesFragment:Fragment(), Contract.Movies.FragmentContract {
         }
 
         vpCarousel.adapter = pagerAdapterMovie
-        adapterPopularMovies = HorizontalMovieListRecyclerAdapter(context)
-        adapterTopRatedMovies = HorizontalMovieListRecyclerAdapter(context)
-        adapterUpcomingMovies = HorizontalMovieListRecyclerAdapter(context)
+        adapterPopularMovies = HorizontalMovieListRecyclerAdapter()
+        adapterTopRatedMovies = HorizontalMovieListRecyclerAdapter()
+        adapterUpcomingMovies = HorizontalMovieListRecyclerAdapter()
 
         rvPopularMovies = view.findViewById(R.id.rv_popular_movies)
         rvTopRatedMovies = view.findViewById(R.id.rv_top_rated_movies)

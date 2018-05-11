@@ -38,51 +38,55 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingLeft="10dp"
                     android:gravity="center_vertical">
-                    <com.facebook.drawee.view.SimpleDraweeView
-                        android:layout_width="100dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_height="match_parent"
-                        android:id="@+id/sdv_poster_image"/>
-                    <TextView
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="left|center_vertical"
-                        android:textAllCaps="true"
-                        android:layout_toRightOf="@+id/sdv_poster_image"
-                        android:layout_toLeftOf="@+id/rl_rating"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:id="@+id/tv_title"
-                        tools:text="Avengers: Thasdasd  asda das asd a"/>
-                    <RelativeLayout
-                        android:layout_width="40dp"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="10dp"
-                        android:id="@+id/rl_rating">
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:src="@drawable/rating_background"/>
+                        android:paddingLeft="10dp">
+                        <com.facebook.drawee.view.SimpleDraweeView
+                            android:layout_width="100dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_height="match_parent"
+                            android:id="@+id/sdv_poster_image"/>
                         <TextView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            tools:text="5.6"
-                            android:id="@+id/tv_rating"
-                            android:paddingRight="4dp"
+                            android:layout_height="match_parent"
+                            android:gravity="left|center_vertical"
+                            android:textAllCaps="true"
+                            android:layout_toRightOf="@+id/sdv_poster_image"
+                            android:layout_toLeftOf="@+id/rl_rating"
                             android:textStyle="bold"
-                            android:gravity="center"
-                            android:text=""/>
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="10dp"
-                            android:scaleY="-1"
-                            android:background="@drawable/black_tranparent_gradient"/>
+                            android:textSize="16sp"
+                            android:id="@+id/tv_title"
+                            tools:text="Avengers: Thasdasd  asda das asd a"/>
+                        <RelativeLayout
+                            android:layout_width="40dp"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="10dp"
+                            android:id="@+id/rl_rating">
+                            <ImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:src="@drawable/rating_background"/>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                tools:text="5.6"
+                                android:id="@+id/tv_rating"
+                                android:paddingRight="4dp"
+                                android:textStyle="bold"
+                                android:gravity="center"
+                                android:text=""/>
+                        </RelativeLayout>
                     </RelativeLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_alignParentBottom="true"
+                        android:background="@drawable/black_tranparent_gradient"/>
                 </RelativeLayout>
             </android.support.v7.widget.Toolbar>
         </android.support.design.widget.CollapsingToolbarLayout>
@@ -166,6 +170,29 @@
                     android:nestedScrollingEnabled="false"/>
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="Similar Taste"
+                    android:padding="10dp"
+                    android:alpha="0.7"
+                    android:textAllCaps="true"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:id="@+id/tv_string_similar"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rv_similar"
+                    android:nestedScrollingEnabled="false"/>
+            </LinearLayout>
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>
