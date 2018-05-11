@@ -1,10 +1,7 @@
 package com.contributetech.scripts.network
 
 import com.contributetech.scripts.database.movieDetails.MovieDetail
-import com.contributetech.scripts.network.responseVo.CollectionResponseVO
-import com.contributetech.scripts.network.responseVo.ShowListResponseVO
-import com.contributetech.scripts.network.responseVo.ShowsResponseVO
-import com.contributetech.scripts.network.responseVo.TvShowsResponseVO
+import com.contributetech.scripts.network.responseVo.*
 import io.reactivex.Observable
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -41,4 +38,10 @@ interface TMDBApi {
 
     @GET("collection/{collection_id}")
     fun getCollectionDetail(@Path(value = "collection_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<CollectionResponseVO>
+
+    @GET("movie/{movie_id}/credits")
+    fun getCredits(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<CreditResponseVO>
+
+    @GET("movie/{movie_id}/reviews")
+    fun getReviews(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<ReviewResponseVO>
 }

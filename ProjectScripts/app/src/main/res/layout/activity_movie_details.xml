@@ -77,6 +77,11 @@
                             android:textStyle="bold"
                             android:gravity="center"
                             android:text=""/>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="10dp"
+                            android:scaleY="-1"
+                            android:background="@drawable/black_tranparent_gradient"/>
                     </RelativeLayout>
                 </RelativeLayout>
             </android.support.v7.widget.Toolbar>
@@ -90,7 +95,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <include layout="@layout/movie_detail_subcontainer"/>
+
+            <include layout="@layout/movie_detail_subcontainer" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,8 +111,7 @@
                     android:alpha="0.7"
                     android:textAllCaps="true"
                     android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:id="@+id/tv_string_collection"/>
+                    android:textStyle="bold"/>
 
                 <android.support.v7.widget.RecyclerView
                     android:layout_width="match_parent"
@@ -114,6 +119,53 @@
                     android:id="@+id/rv_collection"
                     android:nestedScrollingEnabled="false"/>
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="REVIEWS"
+                    android:padding="10dp"
+                    android:alpha="0.7"
+                    android:textAllCaps="true"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+                <android.support.v4.view.ViewPager
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:id="@+id/vp_reviews"
+                    android:nestedScrollingEnabled="false"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="Cast"
+                    android:padding="10dp"
+                    android:alpha="0.7"
+                    android:textAllCaps="true"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:id="@+id/tv_string_cast"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rv_casts"
+                    android:nestedScrollingEnabled="false"/>
+            </LinearLayout>
+
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>

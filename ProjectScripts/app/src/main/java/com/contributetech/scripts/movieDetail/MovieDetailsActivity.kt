@@ -7,19 +7,22 @@ import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.widget.LinearLayout
 import android.widget.TextView
 import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
 import com.contributetech.scripts.commonListeners.IMovieClick
+import com.contributetech.scripts.database.Cast
 import com.contributetech.scripts.database.Genre
 import com.contributetech.scripts.database.ProductionCompany
+import com.contributetech.scripts.database.Review
 import com.contributetech.scripts.database.movieDetails.MovieDetail
 import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
 import com.contributetech.scripts.network.responseVo.CollectionResponseVO
+import com.contributetech.scripts.network.responseVo.CreditResponseVO
+import com.contributetech.scripts.network.responseVo.ReviewResponseVO
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -40,7 +43,11 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
     lateinit var vpCarousel:ViewPager
     lateinit var imageCarouselAdapter:PagerImageCarouselAdapter
     lateinit var rvCollection:RecyclerView
+    lateinit var rvCast:RecyclerView
+    lateinit var vpReview:ViewPager
     lateinit var adapterCollection:CollectionItemRecyclerAdapter
+    lateinit var adapterReview:ReviewsPagerAdapter
+    lateinit var adapterCast:CastHorizontalRecyclerAdapter
 
 
     lateinit var sdvPoster:SimpleDraweeView
@@ -66,6 +73,8 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         initView()
         if(movieId != -1) {
             fetchMovie()
+            fetchReviews()
+            fetchCredits()
         }
     }
 
@@ -73,12 +82,19 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         vpCarousel = findViewById(R.id.vp_movie_carousel) as ViewPager
         imageCarouselAdapter = PagerImageCarouselAdapter(this)
         rvCollection = findViewById(R.id.rv_collection) as RecyclerView
+        vpReview = findViewById(R.id.vp_reviews) as ViewPager
+        rvCast = findViewById(R.id.rv_casts) as RecyclerView
         rvCollection.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        adapterCollection = CollectionItemRecyclerAdapter(this)
+        rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        adapterCollection = CollectionItemRecyclerAdapter()
+        adapterCast = CastHorizontalRecyclerAdapter()
+        adapterReview = ReviewsPagerAdapter(this)
         adapterCollection.onClickListener = this
         rvCollection.adapter = adapterCollection
+        rvCast.adapter = adapterCast
 
 
+        vpReview.adapter = adapterReview
         vpCarousel.adapter = imageCarouselAdapter
         sdvPoster = findViewById(R.id.sdv_poster_image)
         tvTitle = findViewById(R.id.tv_title)
@@ -108,18 +124,52 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    setData(it)
+                    setCollectionItems(it)
                 }, {
                     handleError(it)
                 })
         mDisposables.add(disposable)
     }
 
+    private fun fetchCredits() {
+        val disposable = mTMDBApi.getCredits(movieId, ParamsUtil.getNowShowingParam())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    setCredits(it)
+                }, {
+                    handleError(it)
+                })
+        mDisposables.add(disposable)
+    }
+
+    private fun fetchReviews() {
+        val disposable = mTMDBApi.getReviews(movieId, ParamsUtil.getNowShowingParam())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    setReviews(it)
+                }, {
+                    handleError(it)
+                })
+        mDisposables.add(disposable)
+    }
+
+    private fun setReviews(reviewResponse: ReviewResponseVO) {
+        val reviews:List<Review> = reviewResponse.results
+        adapterReview.setData(reviews as ArrayList<Review>)
+    }
+
+    private fun setCredits(creditsResponse: CreditResponseVO) {
+        val casts:ArrayList<Cast> = creditsResponse.cast
+        adapterCast.setData(casts)
+    }
+
     private fun handleError(throwable: Throwable) {
 
     }
 
-    private fun setData(response: CollectionResponseVO) {
+    private fun setCollectionItems(response: CollectionResponseVO) {
         adapterCollection.setData(response.parts)
     }
 
@@ -168,11 +218,11 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         var productions = ""
         if (productionCompanies != null) {
             for (company: ProductionCompany in productionCompanies) {
-                productions = productions + company.name + ","
+                productions = productions + company.name + ", "
             }
         }
         if(productions.length > 0){
-            productions  = productions.substring(0, productions.length-1)
+            productions  = productions.substring(0, productions.length-2)
         }
         tvProductions.setText(productions)
     }
@@ -180,10 +230,10 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
     private fun setGenre(genreList: ArrayList<Genre>) {
         var genres = ""
         for (genre: Genre in genreList) {
-            genres = genres + genre.name + ","
+            genres = genres + genre.name + ", "
         }
         if(genres.length > 0){
-            genres  = genres.substring(0, genres.length-1)
+            genres  = genres.substring(0, genres.length-2)
         }
         tvGenre.setText(genres)
     }

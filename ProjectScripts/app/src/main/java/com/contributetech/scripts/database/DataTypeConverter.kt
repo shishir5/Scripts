@@ -43,6 +43,12 @@ class DataTypeConverter {
     }
 
     @TypeConverter
+    fun PCListToJsonObjString(pcs: ArrayList<ProductionCompany>): String {
+        return gson.toJson(pcs).toString();
+    }
+
+
+    @TypeConverter
     fun stringToCollection(collection: String): Collection {
         return Gson().fromJson(collection, Collection::class.java)
 
@@ -55,8 +61,17 @@ class DataTypeConverter {
     }
 
     @TypeConverter
-    fun PCListToJsonObjString(pcs: ArrayList<ProductionCompany>): String {
-        return gson.toJson(pcs).toString();
+    fun stringToCast(cast: String): Cast {
+        return Gson().fromJson(cast, Cast::class.java)
+
     }
+
+    @TypeConverter
+    fun castToString(cast: Cast): String {
+        return cast.toString()
+
+    }
+
+
 }
 
