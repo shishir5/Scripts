@@ -1,15 +1,9 @@
 package com.contributetech.scripts.database
 
 import android.arch.persistence.room.TypeConverter
+import com.contributetech.scripts.database.movieDetails.Collection
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
-
-
-
-
 
 
 class DataTypeConverter {
@@ -38,13 +32,25 @@ class DataTypeConverter {
     }
 
     @TypeConverter
-    fun GenreListToJsonObjString(genres: ArrayList<Genre>): String {
+    fun genreListToJsonObjString(genres: ArrayList<Genre>): String {
         return gson.toJson(genres).toString();
     }
 
     @TypeConverter
-    fun jsonObjToPCList(pcArrayString: String): ArrayList<ProductionCompany> {
+    fun toPCList(pcArrayString: String): ArrayList<ProductionCompany> {
         return Gson().fromJson(pcArrayString, object : TypeToken<ArrayList<ProductionCompany>>() {}.type)
+
+    }
+
+    @TypeConverter
+    fun stringToCollection(collection: String): Collection {
+        return Gson().fromJson(collection, Collection::class.java)
+
+    }
+
+    @TypeConverter
+    fun collectiontoString(collection: Collection): String {
+        return collection.toString()
 
     }
 

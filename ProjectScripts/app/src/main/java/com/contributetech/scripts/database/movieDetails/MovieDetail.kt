@@ -9,6 +9,7 @@ import com.contributetech.scripts.database.Genre
 import com.contributetech.scripts.database.ProductionCompany
 import com.google.gson.annotations.SerializedName
 
+@TypeConverters(DataTypeConverter::class)
 @Entity
 class MovieDetail (
         @PrimaryKey
@@ -20,6 +21,11 @@ class MovieDetail (
         var backdropPath:String?,
 
         var budget:Int,
+
+        @ColumnInfo(name = "belongs_to_collection")
+        @SerializedName("belongs_to_collection")
+        @TypeConverters(DataTypeConverter::class)
+        var collection: Collection?,
 
         var genres:ArrayList<Genre>,
 

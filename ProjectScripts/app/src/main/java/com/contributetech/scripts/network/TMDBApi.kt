@@ -1,6 +1,7 @@
 package com.contributetech.scripts.network
 
 import com.contributetech.scripts.database.movieDetails.MovieDetail
+import com.contributetech.scripts.network.responseVo.CollectionResponseVO
 import com.contributetech.scripts.network.responseVo.ShowListResponseVO
 import com.contributetech.scripts.network.responseVo.ShowsResponseVO
 import com.contributetech.scripts.network.responseVo.TvShowsResponseVO
@@ -37,4 +38,7 @@ interface TMDBApi {
 
     @GET("movie/{id}")
     fun getMovieDetail(@Path(value = "id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<MovieDetail>
+
+    @GET("collection/{collection_id}")
+    fun getCollectionDetail(@Path(value = "collection_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<CollectionResponseVO>
 }

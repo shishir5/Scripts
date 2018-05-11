@@ -16,7 +16,7 @@ class RoomModule(mApplication: ScriptsApplication) {
 
     @Singleton
     @Provides
-    fun provideTMDBDb   (): TMDBDatabase {
+    fun provideTMDBDb(): TMDBDatabase {
         return mdatabase
     }
 

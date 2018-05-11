@@ -5,9 +5,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
+import com.contributetech.scripts.commonListeners.IMovieClick
 import com.contributetech.scripts.database.Genre
 import com.contributetech.scripts.database.ProductionCompany
 import com.contributetech.scripts.database.movieDetails.MovieDetail
@@ -15,6 +19,7 @@ import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
+import com.contributetech.scripts.network.responseVo.CollectionResponseVO
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -22,7 +27,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class MovieDetailsActivity:AppCompatActivity() {
+class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
 
     var movieId:Int = -1
 
@@ -34,6 +39,10 @@ class MovieDetailsActivity:AppCompatActivity() {
 
     lateinit var vpCarousel:ViewPager
     lateinit var imageCarouselAdapter:PagerImageCarouselAdapter
+    lateinit var rvCollection:RecyclerView
+    lateinit var adapterCollection:CollectionItemRecyclerAdapter
+
+
     lateinit var sdvPoster:SimpleDraweeView
     lateinit var tvTitle:TextView
     lateinit var tvRating:TextView
@@ -61,8 +70,15 @@ class MovieDetailsActivity:AppCompatActivity() {
     }
 
     private fun initView() {
-        vpCarousel = findViewById(R.id.vp_movie_carousel)
+        vpCarousel = findViewById(R.id.vp_movie_carousel) as ViewPager
         imageCarouselAdapter = PagerImageCarouselAdapter(this)
+        rvCollection = findViewById(R.id.rv_collection) as RecyclerView
+        rvCollection.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        adapterCollection = CollectionItemRecyclerAdapter(this)
+        adapterCollection.onClickListener = this
+        rvCollection.adapter = adapterCollection
+
+
         vpCarousel.adapter = imageCarouselAdapter
         sdvPoster = findViewById(R.id.sdv_poster_image)
         tvTitle = findViewById(R.id.tv_title)
@@ -80,6 +96,18 @@ class MovieDetailsActivity:AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    setMovieDetails(it)
+                }, {
+                    handleError(it)
+                })
+        mDisposables.add(disposable)
+    }
+
+    private fun fetchCollection(collectionId:Int) {
+        val disposable = mTMDBApi.getCollectionDetail(collectionId, ParamsUtil.getNowShowingParam())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
                     setData(it)
                 }, {
                     handleError(it)
@@ -91,8 +119,8 @@ class MovieDetailsActivity:AppCompatActivity() {
 
     }
 
-    private fun setData(it: MovieDetail) {
-        setMovieDetails(it)
+    private fun setData(response: CollectionResponseVO) {
+        adapterCollection.setData(response.parts)
     }
 
     private fun setMovieDetails(movie: MovieDetail) {
@@ -105,20 +133,35 @@ class MovieDetailsActivity:AppCompatActivity() {
         }
         getCarouselImages(movie)
         tvOverview.setText(movie.overview)
-        tvRevenue.setText("$ " + movie.revenue)
         tvReleaseDate.setText(movie.releaseDate)
-        var durationString = ""
-        var duration:Int = movie.runtime
-        durationString = (duration % 60).toString() + " mins"
-        duration = duration / 60
-        if(duration > 0)
-            durationString = (duration).toString() + " hr  " + durationString
 
-        tvDuration.setText(durationString)
+        if(movie.revenue > 0)
+            tvRevenue.setText("$ " + movie.revenue)
+        else
+            tvRevenue.setText("-")
+
+        if (movie.runtime > 0)
+            setMovieDuration(movie.runtime)
+        else
+            tvDuration.setText("-")
+
         if (movie.genres != null)
             setGenre(movie.genres)
         if (movie.productionCompanies != null)
             setProduction(movie.productionCompanies)
+
+        if(movie.collection != null && movie.collection!!.id > 0)
+            fetchCollection(movie.collection!!.id)
+    }
+
+    private fun setMovieDuration(runtime: Int) {
+        var duration:Int = runtime
+        var durationString = ""
+        durationString = (duration % 60).toString() + " mins"
+        duration = duration / 60
+        if(duration > 0)
+            durationString = (duration).toString() + " hr  " + durationString
+        tvDuration.setText(durationString)
     }
 
     private fun setProduction(productionCompanies: ArrayList<ProductionCompany>?) {
@@ -160,5 +203,11 @@ class MovieDetailsActivity:AppCompatActivity() {
             val uri = Uri.parse(path)
             sdvPoster.setImageURI(uri.toString())
         }
+    }
+
+    override fun onMovieClick(id: Int) {
+        val intent = Intent(this, MovieDetailsActivity::class.java)
+        intent.putExtra("id", id);
+        startActivity(intent)
     }
 }
