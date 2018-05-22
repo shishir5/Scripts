@@ -1,0 +1,18 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="350dp"
+    android:gravity="center">
+    <com.google.android.youtube.player.YouTubeThumbnailView
+        android:id="@+id/video_thumbnail_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:background="@android:color/darker_gray"
+        android:contentDescription="@string/thumbnail_image_view_desc"
+        android:scaleType="centerCrop" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/black_tranparent_gradient"/>
+</RelativeLayout>

@@ -72,6 +72,17 @@ class DataTypeConverter {
 
     }
 
+    @TypeConverter
+    fun stringToVideoListItem(videoItemString: String): VideoListItem {
+        return Gson().fromJson(videoItemString, VideoListItem::class.java)
+
+    }
+
+    @TypeConverter
+    fun videoListItemToString(videoListItem: VideoListItem): String {
+        return videoListItem.toString()
+
+    }
 
 }
 

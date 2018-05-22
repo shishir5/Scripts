@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Scripts</string>
+    <string name="thumbnail_image_view_desc">\"youtube video description</string>
 </resources>

@@ -2,9 +2,7 @@ package com.contributetech.scripts.movieDetail
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -13,10 +11,7 @@ import android.widget.TextView
 import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
 import com.contributetech.scripts.commonListeners.IMovieClick
-import com.contributetech.scripts.database.Cast
-import com.contributetech.scripts.database.Genre
-import com.contributetech.scripts.database.ProductionCompany
-import com.contributetech.scripts.database.Review
+import com.contributetech.scripts.database.*
 import com.contributetech.scripts.database.movieDetails.MovieDetail
 import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
 import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
@@ -24,10 +19,7 @@ import com.contributetech.scripts.homescreen.HorizontalMovieListRecyclerAdapter
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
-import com.contributetech.scripts.network.responseVo.CollectionResponseVO
-import com.contributetech.scripts.network.responseVo.CreditResponseVO
-import com.contributetech.scripts.network.responseVo.ReviewResponseVO
-import com.contributetech.scripts.network.responseVo.SimilarMoviesResponseVO
+import com.contributetech.scripts.network.responseVo.*
 import com.contributetech.scripts.util.ImageUtil
 import com.facebook.drawee.view.SimpleDraweeView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -35,7 +27,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
+class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClick {
 
     var movieId:Int = -1
 
@@ -46,7 +38,7 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
     lateinit var mTMDBApi:TMDBApi
 
     lateinit var vpCarousel:ViewPager
-    lateinit var imageCarouselAdapter:PagerImageCarouselAdapter
+    lateinit var videoCarouselAdapter:PagerVideoCarouselAdapter
     lateinit var rvCollection:RecyclerView
     lateinit var rvCast:RecyclerView
     lateinit var vpReview:ViewPager
@@ -80,15 +72,39 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         initView()
         if(movieId != -1) {
             fetchMovie()
+            fetchVideos()
             fetchReviews()
             fetchCredits()
             fetchSimilarMovies()
         }
     }
 
+    private fun fetchVideos() {
+        val disposable = mTMDBApi.getVideosForMovie(movieId, ParamsUtil.getNowShowingParam())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    setMovieVideos(it)
+                }, {
+                    handleError(it)
+                })
+        mDisposables.add(disposable)    }
+
+    private fun setMovieVideos(videoListResponse: VideoListResponseVO) {
+        val videoList:ArrayList<VideoListItem> =  videoListResponse.results
+        if(videoCarouselAdapter == null) {
+            videoCarouselAdapter = PagerVideoCarouselAdapter(this, videoList, this)
+            vpCarousel.adapter = videoCarouselAdapter
+        }
+        else {
+            videoCarouselAdapter.setData(videoList)
+        }
+        vpCarousel.setCurrentItem(0)
+    }
+
     private fun initView() {
         vpCarousel = findViewById(R.id.vp_movie_carousel) as ViewPager
-        imageCarouselAdapter = PagerImageCarouselAdapter(this)
+        videoCarouselAdapter = PagerVideoCarouselAdapter(this, arrayListOf<VideoListItem>(), this)
         rvCollection = findViewById(R.id.rv_collection) as RecyclerView
         vpReview = findViewById(R.id.vp_reviews) as ViewPager
         rvCast = findViewById(R.id.rv_casts) as RecyclerView
@@ -97,15 +113,18 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvSimilar.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         adapterCollection = CollectionItemRecyclerAdapter()
+        adapterCollection.onClickListener = this
+        adapterSimilar = HorizontalMovieListRecyclerAdapter()
+        adapterSimilar.onClickListener = this
+
         adapterCast = CastHorizontalRecyclerAdapter()
         adapterReview = ReviewsPagerAdapter(this)
-        adapterSimilar = HorizontalMovieListRecyclerAdapter()
         adapterCollection.onClickListener = this
 
         rvCollection.adapter = adapterCollection
         rvCast.adapter = adapterCast
         vpReview.adapter = adapterReview
-        vpCarousel.adapter = imageCarouselAdapter
+        vpCarousel.adapter = videoCarouselAdapter
         rvSimilar.adapter = adapterSimilar
 
         rvCollection.isNestedScrollingEnabled = false
@@ -214,7 +233,6 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         if(movie.voteAvg != null) {
             tvRating.setText(movie.voteAvg.toString())
         }
-        getCarouselImages(movie)
         tvOverview.setText(movie.overview)
         tvReleaseDate.setText(movie.releaseDate)
 
@@ -271,15 +289,6 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
         tvGenre.setText(genres)
     }
 
-    private fun getCarouselImages(movie:MovieDetail) {
-        val mImageList:MutableList<String> = mutableListOf()
-        val url:String? = movie.backdropPath
-        if(url != null) {
-            mImageList.add(url)
-        }
-        imageCarouselAdapter.setData(mImageList as ArrayList<String>)
-    }
-
     private fun setPosterImage(imageUrl:String?) {
         if (imageUrl != null) {
             val path: String = NetworkImageUtil.getImagePath(imageUrl, ImageUtil.LandscapeSizes.large_size)
@@ -291,6 +300,11 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick {
     override fun onMovieClick(id: Int) {
         val intent = Intent(this, MovieDetailsActivity::class.java)
         intent.putExtra("id", id);
+        startActivity(intent)
+    }
+    override fun onClick(videoUrl: String) {
+        var intent = Intent(this, FullScreenVideoActivity::class.java)
+        intent.putExtra("video_url", videoUrl);
         startActivity(intent)
     }
 }
