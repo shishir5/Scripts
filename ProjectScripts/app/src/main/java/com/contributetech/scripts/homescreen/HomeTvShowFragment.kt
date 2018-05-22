@@ -1,6 +1,7 @@
 package com.contributetech.scripts.homescreen
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
@@ -11,13 +12,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.contributetech.scripts.R
+import com.contributetech.scripts.commonListeners.ITvClick
 import com.contributetech.scripts.database.DBCallBacks
 import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
 import com.contributetech.scripts.network.responseVo.TvShowsResponseVO
+import com.contributetech.scripts.tvDetails.TvDetailsActivity
 
 
-class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
-
+class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract, ITvClick {
     var airingTodayTvList:ArrayList<Int> = arrayListOf()
     var popularTvList:ArrayList<Int> = arrayListOf()
     var onAirTvList:ArrayList<Int> = arrayListOf()
@@ -60,6 +62,7 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
         val context: Context = activity as Context
         vpCarousel = view.findViewById(R.id.vp_carousel)
         pagerAdapter = TvCarouselPagerAdapter(context)
+        pagerAdapter.listener = this
         vpCarousel.adapter = pagerAdapter
         adapterOnAirTv = HorizontalTvListRecyclerAdapter(context)
         adapterTopRatedMovies = HorizontalTvListRecyclerAdapter(context)
@@ -74,6 +77,11 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
         rvOnAirTv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         rvTopRatedTv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         rvPopularTv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+        adapterOnAirTv.listener = this
+        adapterPopularTv.listener = this
+        adapterTopRatedMovies.listener = this
+
         rvOnAirTv.adapter = adapterOnAirTv
         rvPopularTv.adapter = adapterPopularTv
         rvTopRatedTv.adapter = adapterTopRatedMovies
@@ -201,4 +209,15 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract {
         }
 
     }
+
+    override fun onTvClick(id: Int) {
+        val intent = Intent(activity, TvDetailsActivity::class.java)
+        intent.putExtra("id", id);
+        startActivity(intent)
+    }
+
+    override fun onSeasonClick(id: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }

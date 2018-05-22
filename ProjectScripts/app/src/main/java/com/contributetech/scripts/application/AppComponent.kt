@@ -5,6 +5,7 @@ import dagger.Component
 import com.contributetech.scripts.database.RoomModule
 import com.contributetech.scripts.movieDetail.MovieDetailsActivity
 import com.contributetech.scripts.network.NetworkModule
+import com.contributetech.scripts.tvDetails.TvDetailsActivity
 import javax.inject.Singleton
 
 /**
@@ -15,5 +16,6 @@ import javax.inject.Singleton
 interface AppComponent{
     fun inject(mHomeActivity: HomeActivity)
     fun inject(mMovieDetailsActivity: MovieDetailsActivity)
+    fun inject(mTvDetailsActivity: TvDetailsActivity)
 }
 

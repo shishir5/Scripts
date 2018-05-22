@@ -1,4 +1,4 @@
-package com.contributetech.scripts.movieDetail
+package com.contributetech.scripts.tvDetails
 
 import android.content.Intent
 import android.net.Uri
@@ -7,15 +7,18 @@ import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import android.widget.TextView
 import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
-import com.contributetech.scripts.commonListeners.IMovieClick
+import com.contributetech.scripts.commonListeners.ITvClick
 import com.contributetech.scripts.database.*
-import com.contributetech.scripts.database.movieDetails.MovieDetail
-import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
 import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
-import com.contributetech.scripts.homescreen.HorizontalMovieListRecyclerAdapter
+import com.contributetech.scripts.database.tvDetails.SeasonsItemDetail
+import com.contributetech.scripts.database.tvDetails.TvDetail
+import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
+import com.contributetech.scripts.homescreen.HorizontalTvListRecyclerAdapter
+import com.contributetech.scripts.movieDetail.*
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
@@ -27,34 +30,34 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClick {
+class TvDetailsActivity:AppCompatActivity(), ITvClick, IVideoThumbnailClick {
 
-    var movieId:Int = -1
+    var tvId:Int = -1
 
     @Inject
-    lateinit var mTMDBApi:TMDBApi
+    lateinit var mTMDBApi: TMDBApi
 
-    lateinit var vpCarousel:ViewPager
-    lateinit var videoCarouselAdapter:PagerVideoCarouselAdapter
-    lateinit var rvCollection:RecyclerView
-    lateinit var rvCast:RecyclerView
-    lateinit var vpReview:ViewPager
-    lateinit var rvSimilar:RecyclerView
-    lateinit var adapterCollection:CollectionItemRecyclerAdapter
-    lateinit var adapterReview:ReviewsPagerAdapter
-    lateinit var adapterCast:CastHorizontalRecyclerAdapter
-    lateinit var adapterSimilar:HorizontalMovieListRecyclerAdapter
+    lateinit var vpCarousel: ViewPager
+    lateinit var videoCarouselAdapter: PagerVideoCarouselAdapter
+    lateinit var rvCollection: RecyclerView
+    lateinit var rvCast: RecyclerView
+    lateinit var vpReview: ViewPager
+    lateinit var rvSimilar: RecyclerView
+    lateinit var adapterCollection: SeasonsItemRecyclerAdapter
+    lateinit var adapterReview: ReviewsPagerAdapter
+    lateinit var adapterCast: CastHorizontalRecyclerAdapter
+    lateinit var adapterSimilar: HorizontalTvListRecyclerAdapter
 
 
-    lateinit var sdvPoster:SimpleDraweeView
-    lateinit var tvTitle:TextView
-    lateinit var tvRating:TextView
-    lateinit var tvOverview:TextView
-    lateinit var tvRevenue:TextView
-    lateinit var tvReleaseDate:TextView
-    lateinit var tvDuration:TextView
-    lateinit var tvGenre:TextView
-    lateinit var tvProductions:TextView
+    lateinit var sdvPoster: SimpleDraweeView
+    lateinit var tvTitle: TextView
+    lateinit var tvRating: TextView
+    lateinit var tvOverview: TextView
+    lateinit var tvRevenue: TextView
+    lateinit var tvReleaseDate: TextView
+    lateinit var tvDuration: TextView
+    lateinit var tvGenre: TextView
+    lateinit var tvProductions: TextView
 
     private var mDisposables = CompositeDisposable()
 
@@ -62,22 +65,22 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_details)
         (application as ScriptsApplication).mAppComponent.inject((this))
-        val intent:Intent = intent
+        val intent: Intent = intent
         if(intent.hasExtra("id")) {
-            movieId = intent.getIntExtra("id", -1)
+            tvId = intent.getIntExtra("id", -1)
         }
         initView()
-        if(movieId != -1) {
-            fetchMovie()
+        if(tvId != -1) {
+            fetchTv()
             fetchVideos()
             fetchReviews()
             fetchCredits()
-            fetchSimilarMovies()
+            fetchSimilarTv()
         }
     }
 
     private fun fetchVideos() {
-        val disposable = mTMDBApi.getVideosForMovie(movieId, ParamsUtil.getNowShowingParam())
+        val disposable = mTMDBApi.getVideosForTv(tvId, ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -109,14 +112,13 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
         rvCollection.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvSimilar.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        adapterCollection = CollectionItemRecyclerAdapter()
-        adapterCollection.onClickListener = this
-        adapterSimilar = HorizontalMovieListRecyclerAdapter()
-        adapterSimilar.onClickListener = this
+        adapterCollection = SeasonsItemRecyclerAdapter()
+        adapterCollection.itemClickListener = this
+        adapterSimilar = HorizontalTvListRecyclerAdapter(this)
+        adapterSimilar.listener = this
 
         adapterCast = CastHorizontalRecyclerAdapter()
         adapterReview = ReviewsPagerAdapter(this)
-        adapterCollection.onClickListener = this
 
         rvCollection.adapter = adapterCollection
         rvCast.adapter = adapterCast
@@ -140,24 +142,12 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
         tvProductions= findViewById(R.id.tv_production)
     }
 
-    private fun fetchMovie() {
-        val disposable = mTMDBApi.getMovieDetail(movieId, ParamsUtil.getNowShowingParam())
+    private fun fetchTv() {
+        val disposable = mTMDBApi.getTvDetail(tvId, ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    setMovieDetails(it)
-                }, {
-                    handleError(it)
-                })
-        mDisposables.add(disposable)
-    }
-
-    private fun fetchCollection(collectionId:Int) {
-        val disposable = mTMDBApi.getCollectionDetail(collectionId, ParamsUtil.getNowShowingParam())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    setCollectionItems(it)
+                    setTvDetails(it)
                 }, {
                     handleError(it)
                 })
@@ -165,7 +155,7 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
     }
 
     private fun fetchCredits() {
-        val disposable = mTMDBApi.getCredits(movieId, ParamsUtil.getNowShowingParam())
+        val disposable = mTMDBApi.getCreditsForTv(tvId, ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -177,7 +167,7 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
     }
 
     private fun fetchReviews() {
-        val disposable = mTMDBApi.getReviews(movieId, ParamsUtil.getNowShowingParam())
+        val disposable = mTMDBApi.getTvReviews(tvId, ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -188,8 +178,8 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
         mDisposables.add(disposable)
     }
 
-    private fun fetchSimilarMovies() {
-        val disposable = mTMDBApi.getSimilarMovies(movieId, ParamsUtil.getNowShowingParam())
+    private fun fetchSimilarTv() {
+        val disposable = mTMDBApi.getSimilarTv(tvId, ParamsUtil.getNowShowingParam())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -200,8 +190,8 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
         mDisposables.add(disposable)
     }
 
-    private fun setSimilarMovies(similarMoviesResponse: SimilarMoviesResponseVO) {
-        adapterSimilar.setData(similarMoviesResponse.results as ArrayList<MovieListItem>)
+    private fun setSimilarMovies(similarTvResponse: SimilarTvResponseVO) {
+        adapterSimilar.setData(similarTvResponse.results as ArrayList<TvShowListItem>)
     }
 
     private fun setReviews(reviewResponse: ReviewResponseVO) {
@@ -218,49 +208,35 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
 
     }
 
-    private fun setCollectionItems(response: CollectionResponseVO) {
-        adapterCollection.setData(response.parts)
-    }
-
-    private fun setMovieDetails(movie: MovieDetail) {
-        setPosterImage(movie.posterPath)
-        if(movie.title != null) {
-            tvTitle.setText(movie.title)
+    private fun setTvDetails(tv: TvDetail) {
+        setPosterImage(tv.posterPath)
+        if(tv.originalName != null) {
+            tvTitle.setText(tv.originalName)
         }
-        if(movie.voteAvg != null) {
-            tvRating.setText(movie.voteAvg.toString())
+        if(tv.voteAvg != null) {
+            tvRating.setText(tv.voteAvg.toString())
         }
-        tvOverview.setText(movie.overview)
-        tvReleaseDate.setText(movie.releaseDate)
+        tvOverview.setText(tv.overview)
+        tvReleaseDate.setText(tv.firstAirDate)
 
-        if(movie.revenue > 0)
-            tvRevenue.setText("$ " + movie.revenue)
-        else
-            tvRevenue.setText("-")
+        tvRevenue.visibility = View.GONE
+        tvDuration.visibility = View.GONE
 
-        if (movie.runtime > 0)
-            setMovieDuration(movie.runtime)
-        else
-            tvDuration.setText("-")
 
-        if (movie.genres != null)
-            setGenre(movie.genres)
-        if (movie.productionCompanies != null)
-            setProduction(movie.productionCompanies)
 
-        if(movie.collection != null && movie.collection!!.id > 0)
-            fetchCollection(movie.collection!!.id)
+        if (tv.genres != null)
+            setGenre(tv.genres)
+        if (tv.productionCompaies != null)
+            setProduction(tv.productionCompaies)
+
+        setSeasons(tv.seasons)
     }
 
-    private fun setMovieDuration(runtime: Int) {
-        var duration:Int = runtime
-        var durationString = ""
-        durationString = (duration % 60).toString() + " mins"
-        duration = duration / 60
-        if(duration > 0)
-            durationString = (duration).toString() + " hr  " + durationString
-        tvDuration.setText(durationString)
+    private fun setSeasons(seasons: ArrayList<SeasonsItemDetail>) {
+        adapterCollection.setData(seasons)
+
     }
+
 
     private fun setProduction(productionCompanies: ArrayList<ProductionCompany>?) {
         var productions = ""
@@ -294,14 +270,20 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
         }
     }
 
-    override fun onMovieClick(id: Int) {
-        val intent = Intent(this, MovieDetailsActivity::class.java)
+    override fun onTvClick(id: Int) {
+        val intent = Intent(this, TvDetailsActivity::class.java)
         intent.putExtra("id", id);
         startActivity(intent)
     }
+
+    override fun onSeasonClick(id: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun onClick(videoUrl: String) {
         var intent = Intent(this, FullScreenVideoActivity::class.java)
         intent.putExtra("video_url", videoUrl);
         startActivity(intent)
     }
+
 }

@@ -2,6 +2,7 @@ package com.contributetech.scripts.database
 
 import android.arch.persistence.room.TypeConverter
 import com.contributetech.scripts.database.movieDetails.Collection
+import com.contributetech.scripts.database.tvDetails.SeasonsItemDetail
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -82,6 +83,17 @@ class DataTypeConverter {
     fun videoListItemToString(videoListItem: VideoListItem): String {
         return videoListItem.toString()
 
+    }
+
+    @TypeConverter
+    fun toSeasonList(seasonString: String): ArrayList<SeasonsItemDetail> {
+        return Gson().fromJson(seasonString, object : TypeToken<ArrayList<SeasonsItemDetail>>() {}.type)
+
+    }
+
+    @TypeConverter
+    fun seasonsListToString(seasons: ArrayList<SeasonsItemDetail>): String {
+        return gson.toJson(seasons).toString();
     }
 
 }

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.view.LayoutInflater
 import com.contributetech.scripts.R
+import com.contributetech.scripts.commonListeners.ITvClick
 import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.util.ImageUtil
@@ -18,6 +19,7 @@ import com.facebook.drawee.view.SimpleDraweeView
 class TvCarouselPagerAdapter(var context:Context) : PagerAdapter() {
 
     var tvShowList:ArrayList<TvShowListItem> = ArrayList()
+    var listener:ITvClick? = null
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`
@@ -42,6 +44,10 @@ class TvCarouselPagerAdapter(var context:Context) : PagerAdapter() {
             fivShow.setImageURI(uri.toString())
         }
 
+        fivShow.setOnClickListener(View.OnClickListener {
+            if(listener != null)
+                listener?.onTvClick(tvShow.id)
+        })
         val viewPager = container as ViewPager
         viewPager.addView(view, 0)
 

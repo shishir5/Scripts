@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".movieDetail.MovieDetailsActivity"/>
+        <activity android:name=".tvDetails.TvDetailsActivity"/>
         <activity android:name=".movieDetail.FullScreenVideoActivity"/>
     </application>
 
