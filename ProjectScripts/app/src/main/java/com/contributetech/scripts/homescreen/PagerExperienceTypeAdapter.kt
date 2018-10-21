@@ -3,14 +3,15 @@ package com.contributetech.scripts.homescreen
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
-import android.util.Log
 import android.view.ViewGroup
+import com.contributetech.scripts.homescreen.movieFragment.HomeMoviesFragment
+import com.contributetech.scripts.homescreen.tvFragment.HomeTvShowFragment
 
 class PagerExperienceTypeAdapter(fragmentManager: FragmentManager, var mActivityMoviesContract: Contract.Movies.ActivityContract, var mActivityTvContract: Contract.TvShows.ActivityContract):FragmentStatePagerAdapter(fragmentManager) {
 
     val SIZE:Int = 2
-    var firstFrag:HomeMoviesFragment? = null
-    var secondFrag:HomeTvShowFragment? = null
+    var firstFrag: HomeMoviesFragment? = null
+    var secondFrag: HomeTvShowFragment? = null
 
     override fun getItem(position: Int): Fragment {
         when (position ) {

@@ -13,9 +13,8 @@ import com.contributetech.scripts.application.ScriptsApplication
 import com.contributetech.scripts.commonListeners.IMovieClick
 import com.contributetech.scripts.database.*
 import com.contributetech.scripts.database.movieDetails.MovieDetail
-import com.contributetech.scripts.database.movieDetails.MovieDetailsDao
 import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
-import com.contributetech.scripts.homescreen.HorizontalMovieListRecyclerAdapter
+import com.contributetech.scripts.homescreen.movieFragment.HorizontalMovieListRecyclerAdapter
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
@@ -43,7 +42,7 @@ class MovieDetailsActivity:AppCompatActivity(), IMovieClick, IVideoThumbnailClic
     lateinit var adapterCollection:CollectionItemRecyclerAdapter
     lateinit var adapterReview:ReviewsPagerAdapter
     lateinit var adapterCast:CastHorizontalRecyclerAdapter
-    lateinit var adapterSimilar:HorizontalMovieListRecyclerAdapter
+    lateinit var adapterSimilar: HorizontalMovieListRecyclerAdapter
 
 
     lateinit var sdvPoster:SimpleDraweeView

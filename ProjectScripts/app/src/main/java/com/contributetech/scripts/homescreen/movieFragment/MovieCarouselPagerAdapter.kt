@@ -1,4 +1,4 @@
-package com.contributetech.scripts.homescreen
+package com.contributetech.scripts.homescreen.movieFragment
 
 import android.content.Context
 import android.net.Uri

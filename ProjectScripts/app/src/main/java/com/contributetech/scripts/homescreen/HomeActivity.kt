@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.NestedScrollView
+import android.view.View
+import android.widget.EditText
 import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
 import com.contributetech.scripts.database.DBCallBacks
@@ -12,6 +14,8 @@ import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
 import com.contributetech.scripts.database.moviesListItemDetail.MovieListItemDao
 import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
 import com.contributetech.scripts.database.tvListItemDetail.TvShowListItemDao
+import com.contributetech.scripts.homescreen.movieFragment.HomeMoviesFragment
+import com.contributetech.scripts.homescreen.tvFragment.HomeTvShowFragment
 import com.contributetech.scripts.movieDetail.MovieDetailsActivity
 import com.contributetech.scripts.network.ParamsUtil
 import com.contributetech.scripts.network.TMDBApi
@@ -50,6 +54,17 @@ class HomeActivity : AppCompatActivity(), Contract.Movies.ActivityContract, Cont
         var nsvHomeContainer:NestedScrollView = findViewById(R.id.nsv_home_scrool_container)
         nsvHomeContainer.isFillViewport = true
 
+        var etSearch:EditText = findViewById(R.id.et_search)
+        etSearch?.setOnClickListener(View.OnClickListener {
+            if(!it.hasFocus()) {
+                it?.requestFocus()
+            }
+            else {
+                it?.clearFocus()
+            }
+        })
+
+        etSearch?.clearFocus()
         vpExperienceType = findViewById(R.id.vp_experience_type)
         vpPageChangeListener = object:ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {

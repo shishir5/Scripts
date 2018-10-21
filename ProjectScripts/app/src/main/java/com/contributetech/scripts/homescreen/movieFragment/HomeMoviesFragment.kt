@@ -1,4 +1,4 @@
-package com.contributetech.scripts.homescreen
+package com.contributetech.scripts.homescreen.movieFragment
 
 import android.content.Context
 import android.os.Bundle
@@ -13,6 +13,7 @@ import com.contributetech.scripts.R
 import com.contributetech.scripts.commonListeners.IMovieClick
 import com.contributetech.scripts.database.DBCallBacks
 import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
+import com.contributetech.scripts.homescreen.Contract
 import com.contributetech.scripts.network.responseVo.ShowListResponseVO
 import com.contributetech.scripts.network.responseVo.ShowsResponseVO
 
@@ -24,16 +25,16 @@ class HomeMoviesFragment:Fragment(), Contract.Movies.FragmentContract {
     var popularMovieList:ArrayList<Int> = arrayListOf()
 
     lateinit var vpCarousel: ViewPager
-    lateinit var pagerAdapterMovie:MovieCarouselPagerAdapter
+    lateinit var pagerAdapterMovie: MovieCarouselPagerAdapter
 
     lateinit var rvPopularMovies: RecyclerView
     lateinit var rvUpcomingMovies: RecyclerView
     lateinit var rvTopRatedMovies: RecyclerView
-    lateinit var adapterUpcomingMovies:HorizontalMovieListRecyclerAdapter
-    lateinit var adapterTopRatedMovies:HorizontalMovieListRecyclerAdapter
-    lateinit var adapterPopularMovies:HorizontalMovieListRecyclerAdapter
+    lateinit var adapterUpcomingMovies: HorizontalMovieListRecyclerAdapter
+    lateinit var adapterTopRatedMovies: HorizontalMovieListRecyclerAdapter
+    lateinit var adapterPopularMovies: HorizontalMovieListRecyclerAdapter
 
-    lateinit var mActivityContract:Contract.Movies.ActivityContract
+    lateinit var mActivityContract: Contract.Movies.ActivityContract
 
     companion object {
         val NOW_SHOWING_MOVIES:String = "NOW_SHOWING_MOVIES"
@@ -41,7 +42,7 @@ class HomeMoviesFragment:Fragment(), Contract.Movies.FragmentContract {
         val UPCOMING_MOVIES:String = "UPCOMING_MOVIES"
         val TOP_RATED_MOVIES:String = "TOP_RATED_MOVIES"
 
-        fun newInstance():HomeMoviesFragment {
+        fun newInstance(): HomeMoviesFragment {
             val fragment = HomeMoviesFragment()
             return fragment
         }

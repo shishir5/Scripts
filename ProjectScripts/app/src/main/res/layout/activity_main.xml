@@ -13,12 +13,12 @@
         android:layout_height="match_parent">
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent">
             <android.support.design.widget.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|enterAlways"
-                android:background="@android:color/holo_blue_dark">
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|enterAlways">
                 <include layout="@layout/activity_main_toolbar"/>
                 <android.support.v7.widget.Toolbar
                     android:layout_width="match_parent"
@@ -30,7 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/nsv_home_scrool_container"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:background="@android:color/white">
             <android.support.v4.view.ViewPager
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

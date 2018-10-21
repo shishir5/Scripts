@@ -1,4 +1,4 @@
-package com.contributetech.scripts.homescreen
+package com.contributetech.scripts.homescreen.tvFragment
 
 import android.content.Context
 import android.content.Intent
@@ -15,6 +15,7 @@ import com.contributetech.scripts.R
 import com.contributetech.scripts.commonListeners.ITvClick
 import com.contributetech.scripts.database.DBCallBacks
 import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
+import com.contributetech.scripts.homescreen.Contract
 import com.contributetech.scripts.network.responseVo.TvShowsResponseVO
 import com.contributetech.scripts.tvDetails.TvDetailsActivity
 
@@ -26,7 +27,7 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract, ITvClic
     var topRatedTvList:ArrayList<Int> = arrayListOf()
 
     lateinit var vpCarousel: ViewPager
-    lateinit var pagerAdapter:TvCarouselPagerAdapter
+    lateinit var pagerAdapter: TvCarouselPagerAdapter
     lateinit var tvStringLabel1: TextView
     lateinit var tvStringLabel2: TextView
     lateinit var tvStringLabel3: TextView
@@ -34,11 +35,11 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract, ITvClic
     lateinit var rvOnAirTv: RecyclerView
     lateinit var rvPopularTv: RecyclerView
     lateinit var rvTopRatedTv: RecyclerView
-    lateinit var adapterPopularTv:HorizontalTvListRecyclerAdapter
-    lateinit var adapterTopRatedMovies:HorizontalTvListRecyclerAdapter
-    lateinit var adapterOnAirTv:HorizontalTvListRecyclerAdapter
+    lateinit var adapterPopularTv: HorizontalTvListRecyclerAdapter
+    lateinit var adapterTopRatedMovies: HorizontalTvListRecyclerAdapter
+    lateinit var adapterOnAirTv: HorizontalTvListRecyclerAdapter
 
-    lateinit var mActivityContract:Contract.TvShows.ActivityContract
+    lateinit var mActivityContract: Contract.TvShows.ActivityContract
 
     companion object {
         val ON_AIRING_TODAY:String = "ON_AIRING_TODAY"
@@ -46,7 +47,7 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract, ITvClic
         val POPULAR_TV:String = "POPULAR_TV"
         val TOP_RATED_TV:String = "TOP_RATED_TV"
 
-        fun newInstance():HomeTvShowFragment {
+        fun newInstance(): HomeTvShowFragment {
             val fragment = HomeTvShowFragment()
             return fragment
         }
@@ -64,9 +65,9 @@ class HomeTvShowFragment: Fragment(), Contract.TvShows.FragmentContract, ITvClic
         pagerAdapter = TvCarouselPagerAdapter(context)
         pagerAdapter.listener = this
         vpCarousel.adapter = pagerAdapter
-        adapterOnAirTv = HorizontalTvListRecyclerAdapter(context)
-        adapterTopRatedMovies = HorizontalTvListRecyclerAdapter(context)
-        adapterPopularTv = HorizontalTvListRecyclerAdapter(context)
+        adapterOnAirTv = HorizontalTvListRecyclerAdapter()
+        adapterTopRatedMovies = HorizontalTvListRecyclerAdapter()
+        adapterPopularTv = HorizontalTvListRecyclerAdapter()
 
         rvOnAirTv = view.findViewById(R.id.rv_popular_movies)
         rvTopRatedTv = view.findViewById(R.id.rv_top_rated_movies)

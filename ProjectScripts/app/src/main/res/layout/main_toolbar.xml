@@ -3,20 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:gravity="center_vertical"
-    android:background="@android:color/black">
+    android:background="@android:color/black"
+    android:focusableInTouchMode="true"
+    android:focusable="true">
     <ImageView
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_toLeftOf="@+id/iv_profile"
         android:id="@+id/iv_search"
+        android:layout_centerVertical="true"
         android:layout_marginRight="20dp"
         app:srcCompat="@drawable/ic_search"/>
     <ImageView
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:id="@+id/iv_profile"
         android:layout_marginRight="20dp"
         app:srcCompat="@drawable/ic_profile"/>
+    <AutoCompleteTextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="20dp"
+        android:layout_toLeftOf="@+id/iv_search"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/et_search"/>
 </RelativeLayout>

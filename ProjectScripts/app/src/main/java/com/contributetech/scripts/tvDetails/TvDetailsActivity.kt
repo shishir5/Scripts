@@ -13,11 +13,10 @@ import com.contributetech.scripts.R
 import com.contributetech.scripts.application.ScriptsApplication
 import com.contributetech.scripts.commonListeners.ITvClick
 import com.contributetech.scripts.database.*
-import com.contributetech.scripts.database.moviesListItemDetail.MovieListItem
 import com.contributetech.scripts.database.tvDetails.SeasonsItemDetail
 import com.contributetech.scripts.database.tvDetails.TvDetail
 import com.contributetech.scripts.database.tvListItemDetail.TvShowListItem
-import com.contributetech.scripts.homescreen.HorizontalTvListRecyclerAdapter
+import com.contributetech.scripts.homescreen.tvFragment.HorizontalTvListRecyclerAdapter
 import com.contributetech.scripts.movieDetail.*
 import com.contributetech.scripts.network.NetworkImageUtil
 import com.contributetech.scripts.network.ParamsUtil
@@ -114,7 +113,7 @@ class TvDetailsActivity:AppCompatActivity(), ITvClick, IVideoThumbnailClick {
         rvSimilar.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         adapterCollection = SeasonsItemRecyclerAdapter()
         adapterCollection.itemClickListener = this
-        adapterSimilar = HorizontalTvListRecyclerAdapter(this)
+        adapterSimilar = HorizontalTvListRecyclerAdapter()
         adapterSimilar.listener = this
 
         adapterCast = CastHorizontalRecyclerAdapter()
@@ -277,7 +276,6 @@ class TvDetailsActivity:AppCompatActivity(), ITvClick, IVideoThumbnailClick {
     }
 
     override fun onSeasonClick(id: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onClick(videoUrl: String) {
