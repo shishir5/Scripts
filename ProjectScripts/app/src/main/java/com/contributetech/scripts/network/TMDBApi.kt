@@ -1,0 +1,70 @@
+package com.contributetech.scripts.network
+
+import com.contributetech.scripts.database.movieDetails.MovieDetail
+import com.contributetech.scripts.database.tvDetails.TvDetail
+import com.contributetech.scripts.network.responseVo.*
+import io.reactivex.Observable
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.QueryMap
+
+interface TMDBApi {
+
+    @GET("movie/now_playing")
+    fun getNowPlayingMovies(@QueryMap param : Map<String, String>) : Observable<ShowListResponseVO>
+
+    @GET("movie/popular")
+    fun getPopularMovies(@QueryMap param : Map<String, String>) : Observable<ShowsResponseVO>
+
+    @GET("movie/top_rated")
+    fun getTopRatedMovies(@QueryMap param : Map<String, String>) : Observable<ShowsResponseVO>
+
+    @GET("movie/upcoming")
+    fun getUpcomingMovies(@QueryMap param : Map<String, String>) : Observable<ShowListResponseVO>
+
+    @GET("tv/on_the_air")
+    fun getTvOnAir(@QueryMap param : Map<String, String>) : Observable<TvShowsResponseVO>
+
+    @GET("tv/popular")
+    fun getPopularTv(@QueryMap param : Map<String, String>) : Observable<TvShowsResponseVO>
+
+    @GET("tv/airing_today")
+    fun getTvAiringToday(@QueryMap param : Map<String, String>) : Observable<TvShowsResponseVO>
+
+    @GET("tv/top_rated")
+    fun getTopRatedTv(@QueryMap param : Map<String, String>) : Observable<TvShowsResponseVO>
+
+    @GET("movie/{id}")
+    fun getMovieDetail(@Path(value = "id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<MovieDetail>
+
+    @GET("collection/{collection_id}")
+    fun getCollectionDetail(@Path(value = "collection_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<CollectionResponseVO>
+
+    @GET("movie/{movie_id}/credits")
+    fun getCredits(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<CreditResponseVO>
+
+    @GET("movie/{movie_id}/reviews")
+    fun getReviews(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<ReviewResponseVO>
+
+    @GET("movie/{movie_id}/similar")
+    fun getSimilarMovies(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<SimilarMoviesResponseVO>
+
+    @GET("movie/{movie_id}/videos")
+    fun getVideosForMovie(@Path(value = "movie_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<VideoListResponseVO>
+
+    @GET("tv/{tv_id}")
+    fun getTvDetail(@Path(value = "tv_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<TvDetail>
+
+    @GET("tv/{tv_id}/credits")
+    fun getCreditsForTv(@Path(value = "tv_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<CreditResponseVO>
+
+    @GET("tv/{tv_id}/reviews")
+    fun getTvReviews(@Path(value = "tv_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<ReviewResponseVO>
+
+    @GET("tv/{tv_id}/similar")
+    fun getSimilarTv(@Path(value = "tv_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<SimilarTvResponseVO>
+
+    @GET("tv/{tv_id}/videos")
+    fun getVideosForTv(@Path(value = "tv_id", encoded = true) id:Int, @QueryMap param : Map<String, String>) : Observable<VideoListResponseVO>
+
+}
